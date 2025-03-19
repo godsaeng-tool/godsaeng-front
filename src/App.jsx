@@ -1,0 +1,131 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { IoClose } from "react-icons/io5";
+
+import { AppStateProvider, useAppState } from "./context/AppStateProvider";
+import AuthPopup from "./pages/Popup/AuthPopup";
+import LoginModal from "./pages/Popup/LoginModal";
+import SignupModal from "./pages/Popup/SignupModal";
+import UploadBox from "./pages/Home/Home";
+import Sidebar from "./pages/Home/Sidebar";
+import SummaryPage from "./pages/Summary/SummaryPage";
+import LectureDetailPage from "./pages/Summary/LectureDetailPage";
+
+import "./App.css";
+
+function AppContent() {
+  const {
+    showLogin, setShowLogin,
+    showSignup, setShowSignup,
+    showAuthPopup, setShowAuthPopup,
+    isAuthenticated, setIsAuthenticated,
+    userEmail, setUserEmail,
+    userName, setUserName,
+    recentSummaries, setRecentSummaries,
+    handleLogout,
+    handleLoginSuccess,
+  } = useAppState();
+
+  const handleLoginClick = () => {
+    setShowLogin(true);
+    setShowSignup(false);
+  };
+
+  const handleSignupClick = () => {
+    setShowSignup(true);
+    setShowLogin(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowLogin(false);
+    setShowSignup(false);
+  };
+
+  return (
+    <Router>
+      <div className="app-container">
+        <Sidebar
+          recentSummaries={recentSummaries}
+          setRecentSummaries={setRecentSummaries}
+          onOpenAuthPopup={() => setShowAuthPopup(true)}
+          onHomeClick={() => (window.location.href = "/")}
+          isAuthenticated={isAuthenticated}
+          userEmail={userEmail}
+          userName={userName}
+          onLogout={handleLogout}
+        />
+
+        <div className="main-header">
+          <img
+            src="/fire_icon.png"
+            alt="fire"
+            className="logo-img"
+            onClick={() => (window.location.href = "/")}
+            style={{ cursor: "pointer" }}
+          />
+          <div
+            className="logo"
+            onClick={() => (window.location.href = "/")}
+            style={{ cursor: "pointer" }}
+          >
+            갓생학습
+          </div>
+        </div>
+
+        <div className="main-content">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <UploadBox
+                  isAuthenticated={isAuthenticated}
+                  setRecentSummaries={setRecentSummaries}
+                />
+              }
+            />
+            {/* <Route
+              path="/summary"
+              element={<SummaryPage recentSummaries={recentSummaries} />}
+            /> */}
+
+            <Route
+              path="/lectures/:lectureId"
+              element={<LectureDetailPage recentSummaries={recentSummaries} />
+              }
+            />
+          </Routes>
+
+          {showAuthPopup && (
+            <AuthPopup
+              onLoginClick={handleLoginClick}
+              onSignupClick={handleSignupClick}
+              onClose={() => setShowAuthPopup(false)}
+            />
+          )}
+        </div>
+
+        {showLogin && (
+          <LoginModal
+            onClose={handleCloseModal}
+            setIsAuthenticated={setIsAuthenticated}
+            setUserEmail={setUserEmail}
+            setUserName={setUserName}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+
+        {showSignup && <SignupModal onClose={handleCloseModal} />}
+      </div>
+    </Router>
+  );
+}
+
+function App() {
+  return (
+    <AppStateProvider>
+      <AppContent />
+    </AppStateProvider>
+  );
+}
+
+export default App;
