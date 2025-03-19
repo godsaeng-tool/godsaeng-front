@@ -6,7 +6,7 @@ function SignupModal({ onClose }) {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // 성공 메시지 상태 추가
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSignup = async () => {
     if (!email && !password && !username) {
@@ -18,28 +18,50 @@ function SignupModal({ onClose }) {
     if (!username) return setError("닉네임을 입력해주세요.");
 
     try {
-      const response = await fetch("http://localhost:8080/api/users/signup", {
+      // 회원가입 요청
+      const signupResponse = await fetch("http://localhost:8080/api/users/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // 쿠키를 포함한 요청
         body: JSON.stringify({ email, password, username }),
       });
 
-      const result = await response.json();
+      const signupResult = await signupResponse.json();
 
-      if (response.ok) {
+      if (signupResponse.ok) {
         setSuccessMessage("회원가입 성공! 🎉");
         setError(""); // 에러 메시지 초기화
 
-        // 2초 후 자동으로 모달 닫기
-        setTimeout(() => {
-          onClose();
-          window.location.href = "/"; // 회원가입 후 홈으로 이동
-        }, 2000);
+        // 회원가입 후 로그인 처리
+        const loginResponse = await fetch("http://localhost:8080/api/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // 쿠키를 포함한 요청
+          body: JSON.stringify({ email, password }), // 로그인에 필요한 이메일, 비밀번호 전달
+        });
+
+        const loginResult = await loginResponse.json();
+
+        if (loginResponse.ok) {
+          // 로그인 성공 후 받은 JWT 액세스 토큰과 refreshToken을 localStorage에 저장
+          localStorage.setItem("accessToken", loginResult.accessToken);
+          localStorage.setItem("refreshToken", loginResult.refreshToken);
+
+          // 2초 후 자동으로 모달 닫기
+          setTimeout(() => {
+            onClose();
+            window.location.href = "/"; // 회원가입 후 홈으로 이동
+          }, 2000);
+        } else {
+          setError(loginResult.message || "로그인 실패. 다시 시도해주세요.");
+          setSuccessMessage(""); // 성공 메시지 초기화
+        }
       } else {
-        setError(result.message || "회원가입 실패. 다시 시도해주세요.");
+        setError(signupResult.message || "회원가입 실패. 다시 시도해주세요.");
         setSuccessMessage(""); // 성공 메시지 초기화
       }
     } catch (error) {
@@ -48,6 +70,37 @@ function SignupModal({ onClose }) {
       setSuccessMessage(""); // 성공 메시지 초기화
     }
   };
+
+  // 토큰 갱신 처리
+  const refreshToken = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) return;
+
+    try {
+      const response = await fetch("http://localhost:8080/api/users/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // 새 액세스 토큰을 localStorage에 저장
+        localStorage.setItem("accessToken", result.accessToken);
+      } else {
+        console.log("토큰 갱신 실패");
+      }
+    } catch (error) {
+      console.error("토큰 갱신 오류:", error);
+    }
+  };
+
+  // 페이지 로드 시 토큰 갱신 확인 (토큰 만료 체크 후 갱신)
+  React.useEffect(() => {
+    refreshToken();
+  }, []);
 
   return (
     <div className="modal-overlay">
