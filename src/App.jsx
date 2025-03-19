@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { IoClose } from "react-icons/io5";
 
 import { AppStateProvider, useAppState } from "./context/AppStateProvider";
 import AuthPopup from "./pages/Popup/AuthPopup";

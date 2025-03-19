@@ -1,13 +1,13 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { isAuthenticated } from '../../utils/tokenUtils';
+// import React from 'react';
+// import { Navigate } from 'react-router-dom';
+// import { isAuthenticated } from '../../utils/tokenUtils';
 
-const ProtectedRoute = ({ children }) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
+// const ProtectedRoute = ({ children }) => {
+//   if (!isAuthenticated()) {
+//     return <Navigate to="/login" replace />;
+//   }
 
-  return children;
-};
+//   return children;
+// };
 
-export default ProtectedRoute; 
+// export default ProtectedRoute; 

@@ -123,19 +123,18 @@ function Sidebar({
 
   const handleDelete = async (index) => {
     if (!selectedLecture) return;
-    
-    if (window.confirm("이 항목을 삭제하시겠습니까?")) {
-      try {
-        await deleteLecture(selectedLecture.id);
-        
-        fetchLectures();
-        setIsMoreOptionsOpen(null);
-      } catch (error) {
-        console.error('강의 삭제 실패:', error);
-        alert('강의 삭제에 실패했습니다.');
-      }
+  
+    try {
+      await deleteLecture(selectedLecture.id);
+      
+      fetchLectures();
+      setIsMoreOptionsOpen(null);
+    } catch (error) {
+      console.error('강의 삭제 실패:', error);
+      alert('강의 삭제에 실패했습니다.');
     }
   };
+  
 
   const handleEdit = (index) => {
     setEditTitle(localSummaries[index].title);

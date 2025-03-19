@@ -168,13 +168,14 @@
 }
 
 .more-options-menu {
-  position: fixed;
+  position: absolute;
+  transform: translateX(80%) translateY(-12%);
   z-index: 1000;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  width: 140px; /* 너비 증가 */
+  width: 140px;
 }
 
 .more-options-menu button {
@@ -187,7 +188,7 @@
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
-  gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+  gap: 8px;
 }
 
 .more-options-menu button:hover {

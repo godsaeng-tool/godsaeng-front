@@ -260,12 +260,14 @@ function Home({ setRecentSummaries, onLogout }) {
         </button>
       </div>
 
-      {selectedFile && (
+      {(selectedFile || (urlInput && courseTitle)) && (
         <div className="selected-file">
-          <p>{courseTitle || selectedFile.name}</p>
-          <button onClick={handleCancelUpload}>
-            <FaRegTrashCan />
-          </button>
+          <p>{courseTitle || selectedFile?.name}</p>
+          {selectedFile && (
+            <button onClick={handleCancelUpload}>
+              <FaRegTrashCan />
+            </button>
+          )}
           {uploadProgress > 0 && loading && (
             <div className="progress-bar">
               <div className="progress" style={{ width: `${uploadProgress}%` }}></div>
@@ -274,6 +276,7 @@ function Home({ setRecentSummaries, onLogout }) {
           )}
         </div>
       )}
+
 
       {showCourseInput && (
         <div className="modal-overlay" onClick={() => setShowCourseInput(false)}>

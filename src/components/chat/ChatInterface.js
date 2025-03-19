@@ -154,17 +154,9 @@ const ChatInterface = ({ lectureId }) => {
               placeholder="질문을 입력하세요..."
               disabled={loading}
             />
-            <Button 
-              type="submit" 
-              variant="primary" 
-              className="ms-2"
-              disabled={loading || !question.trim()}
-            >
-              {loading ? (
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              ) : (
-                "전송"
-              )}
+            <Button type="submit" className="ms-2"disabled={loading || !question.trim()}
+            style={{ backgroundColor: "#FFC330", borderColor: "#FFC330", color: "black", height: "50px", width: "70px", display: "flex", alignItems: "center",  justifyContent: "center", fontSize: "17px"}}>
+              {loading ? (<span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>) : ("전송")}
             </Button>
           </div>
         </Form>

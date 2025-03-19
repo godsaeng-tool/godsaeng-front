@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { IoClose } from "react-icons/io5";
 import { signup, login } from "../../api/authApi";
 import { setToken, setRefreshToken } from "../../utils/tokenUtils";
 import "../../styles/Popup/Modal.css";
@@ -64,8 +65,10 @@ function SignupModal({ onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal-container">
-        <button className="close-button" onClick={onClose}>X</button>
-        <h2>회원가입</h2>
+        <button className="close-button" onClick={onClose}>
+          <IoClose />
+        </button>
+        <h3>회원가입</h3>
 
         {/* 에러 메시지 표시 */}
         {error && <p className="error-message">{error}</p>}

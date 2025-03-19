@@ -1,0 +1,65 @@
+.lecture-detail-container,
+.center-container {
+  /* transition: margin-left 0.7s ease-in-out; */
+  transition: margin-left 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+  margin-left: 150px; /* 사이드바 펼쳐진 상태 기준 */
+}
+
+.lecture-detail-container.collapsed,
+.center-container.collapsed {
+  margin-left: 40px; /* 사이드바 접힐 때 왼쪽으로 이동 */
+}
+
+.center-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+}
+
+.custom-refresh-btn {
+  background-color: #ffc330 !important;
+  border: none !important;
+  color: #000 !important;
+}
+
+.processing-container {
+  background-color: #f4f4f4;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.lecture-card-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.lecture-tab-content {
+  margin-top: 1rem;
+  white-space: pre-line;
+}
+
+/*요약된 페이지*/
+
+.lecture-title {
+  margin-top: 50px;
+  font-size: 2.5rem;
+}
+
+.custom-nav-tabs .nav-link {
+  color: #333;
+}
+
+.custom-nav-tabs .nav-link.active {
+  color: #ffa500 !important;
+  border-bottom: 2px solid #ffc330;
+}
+
+.custom-nav-tabs .nav-link:hover {
+  color: #ff6200;
+}
+
+.custom-nav-tabs {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
