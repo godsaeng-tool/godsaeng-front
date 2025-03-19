@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineUpload } from "react-icons/hi";
-import { FaPen } from "react-icons/fa";
+import { FaPen, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { IoFolderOpenOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
 import { isAuthenticated } from '../../utils/tokenUtils';
 import { createYoutubeLecture, uploadLecture, getLectures } from '../../api/lectureApi';
+import { getCurrentUser } from '../../api/authApi';
 import '../../styles/Home/Home.css';
 
-function Home({ setRecentSummaries }) {
+function Home({ setRecentSummaries, onLogout }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [urlInput, setUrlInput] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
@@ -18,12 +20,27 @@ function Home({ setRecentSummaries }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
+    
+    if (isAuthenticated()) {
+      fetchUserInfo();
+    }
   }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const userData = await getCurrentUser();
+      setUserInfo(userData);
+    } catch (error) {
+      console.error('사용자 정보 로딩 실패:', error);
+    }
+  };
 
   const handleFileChange = (event) => {
     if (!isLoggedIn) {
@@ -144,8 +161,49 @@ function Home({ setRecentSummaries }) {
     }
   };
 
+  const handleUserIconClick = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
+  const handleLogout = () => {
+    onLogout();
+    setShowUserMenu(false);
+  };
+
+  // 내 서랍 버튼 클릭 핸들러 추가
+  const handleMyDrawerClick = () => {
+    // 내 서랍 페이지로 이동하거나 기능 구현
+    alert('내 서랍 기능은 준비 중입니다.');
+    setShowUserMenu(false);
+  };
+
   return (
     <div className="home">
+      {isLoggedIn && (
+        <div className="user-icon-container">
+          <FaUser className="user-icon" onClick={handleUserIconClick} />
+          {showUserMenu && (
+            <div className="user-menu">
+              {userInfo && (
+                <div className="user-info-dropdown">
+                  <div className="user-name">{userInfo.username || '사용자'}</div>
+                  <div className="user-email">{userInfo.email || ''}</div>
+                </div>
+              )}
+              <div className="menu-divider"></div>
+              <div className="menu-item drawer-item" onClick={handleMyDrawerClick}>
+                <IoFolderOpenOutline className="drawer-icon" />
+                <span>내 서랍</span>
+              </div>
+              <div className="menu-item logout-item" onClick={handleLogout}>
+                <FaSignOutAlt className="logout-icon" />
+                <span>로그아웃</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <h2>영상을 요약하고, 빠르게 이해하세요</h2>
 
       <div className="input-container">

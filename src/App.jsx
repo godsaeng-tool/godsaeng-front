@@ -80,6 +80,7 @@ function AppContent() {
                 <UploadBox
                   isAuthenticated={isAuthenticated}
                   setRecentSummaries={setRecentSummaries}
+                  onLogout={handleLogout}
                 />
               }
             />

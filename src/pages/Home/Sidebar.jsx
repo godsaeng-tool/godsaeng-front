@@ -190,9 +190,9 @@ function Sidebar({
               </div>
             )}
 
-            <li>
+            {/* <li>
               <IoFolderOpenOutline /> 내 서랍
-            </li>
+            </li> */}
           </ul>
 
           {/* 로그인 상태에 따라 버튼 변경 */}
@@ -203,9 +203,9 @@ function Sidebar({
           ) : (
             <div className="user-info-container">
               <div className="user-info">
-                <p>
+                {/* <p>
                   안녕하세요! {userName}님 ({userEmail})
-                </p>
+                </p> */}
               </div>
               <button className="god-mode-button" onClick={toggleGodMode}>
                 <FaCrown className={`crown-icon ${isGodMode ? 'active' : ''}`} />
