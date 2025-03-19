@@ -44,6 +44,8 @@ function LoginModal({ onClose, setIsAuthenticated, setUserEmail, setUserName, on
   
       const result = await response.json();
 
+    localStorage.setItem("accessToken", result.accessToken);
+
       setIsAuthenticated(true);
       setUserEmail(result.email);
       setUserName(result.username);

@@ -84,6 +84,37 @@
   font-size: 15px; /* 아이콘 크기 */
 }
 
+/* 선택한 파일의 이름과 취소 버튼을 감싸는 div */
+.selected-file {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.selected-file p {
+  margin: 0; 
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 업로드 취소 버튼 스타일 */
+.selected-file button {
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 아이콘 스타일 */
+.selected-file button svg {
+  font-size: 20px;
+}
+
 
 /* 모달창 오버레이 */
 .modal-overlay {

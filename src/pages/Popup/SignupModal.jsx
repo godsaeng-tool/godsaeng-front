@@ -41,7 +41,7 @@ function SignupModal({ onClose }) {
             "Content-Type": "application/json",
           },
           credentials: "include", // 쿠키를 포함한 요청
-          body: JSON.stringify({ email, password }), // 로그인에 필요한 이메일, 비밀번호 전달
+          body: JSON.stringify({ email, password }),
         });
 
         const loginResult = await loginResponse.json();
@@ -51,11 +51,11 @@ function SignupModal({ onClose }) {
           localStorage.setItem("accessToken", loginResult.accessToken);
           localStorage.setItem("refreshToken", loginResult.refreshToken);
 
-          // 2초 후 자동으로 모달 닫기
+          // 2.5초 후 자동으로 모달 닫기
           setTimeout(() => {
             onClose();
             window.location.href = "/"; // 회원가입 후 홈으로 이동
-          }, 2000);
+          }, 2500);
         } else {
           setError(loginResult.message || "로그인 실패. 다시 시도해주세요.");
           setSuccessMessage(""); // 성공 메시지 초기화
@@ -73,22 +73,19 @@ function SignupModal({ onClose }) {
 
   // 토큰 갱신 처리
   const refreshToken = async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) return;
-
     try {
       const response = await fetch("http://localhost:8080/api/users/refresh", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ refreshToken }),
+        credentials: "include",
       });
 
       if (response.ok) {
         const result = await response.json();
-        // 새 액세스 토큰을 localStorage에 저장
         localStorage.setItem("accessToken", result.accessToken);
+        console.log("토큰 갱신 성공!");
       } else {
         console.log("토큰 갱신 실패");
       }

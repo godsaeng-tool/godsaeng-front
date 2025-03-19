@@ -5,20 +5,20 @@ export const createLecture = async (lectureData) => {
   return response.data;
 };
 
-// export const createYoutubeLecture = async (lectureData) => {
-//   const response = await api.post('/lectures/youtube', lectureData);
-//   return response.data;
-// };
-
 export const createYoutubeLecture = async (lectureData) => {
-  const token = localStorage.getItem('authToken');
-  const response = await api.post('/lectures/youtube', lectureData, {
-    headers: {
-      'Authorization': `Bearer ${token}`, // 토큰을 헤더에 추가
-    }
-  });
+  const response = await api.post('/lectures/youtube', lectureData);
   return response.data;
 };
+
+// export const createYoutubeLecture = async (lectureData) => {
+//   const token = localStorage.getItem('authToken');
+//   const response = await api.post('/lectures/youtube', lectureData, {
+//     headers: {
+//       'Authorization': `Bearer ${token}`, // 토큰을 헤더에 추가
+//     }
+//   });
+//   return response.data;
+// };
 
 export const uploadLecture = async (formData) => {
   const response = await api.post('/lectures/upload', formData, {
