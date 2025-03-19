@@ -50,7 +50,7 @@ function Home({ setRecentSummaries }) {
           console.log("토큰 재발급 성공");
 
           localStorage.setItem("accessToken", newAccessToken); // 저장
-          // 토큰 재시도도
+          // 토큰 재시도
           return await apiFunc(...args, {
             headers: {
               Authorization: `Bearer ${newAccessToken}`,

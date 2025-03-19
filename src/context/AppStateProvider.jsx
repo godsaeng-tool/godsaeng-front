@@ -71,9 +71,11 @@ export const AppStateProvider = ({ children }) => {
 
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userName");
-    localStorage.removeItem("recentSummaries");
+    localStorage.removeItem(`recentSummaries_${userEmail}`);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
 
-    setShowAuthPopup(true);
+    setTimeout(() => setShowAuthPopup(true), 0);
   };
 
   // 사이드바 토글
