@@ -4,6 +4,7 @@ import { HiOutlineUpload } from "react-icons/hi";
 import { FaPen, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { IoFolderOpenOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
+import { FaRegTrashCan } from "react-icons/fa6";
 import { isAuthenticated } from '../../utils/tokenUtils';
 import { createYoutubeLecture, uploadLecture, getLectures } from '../../api/lectureApi';
 import { getCurrentUser } from '../../api/authApi';
@@ -181,6 +182,23 @@ function Home({ setRecentSummaries, onLogout }) {
     setShowUserMenu(false);
   };
 
+  // 파일 취소
+  const handleCancelUpload = () => {
+    setSelectedFile(null);
+    setUploadProgress(0);
+
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
+  // 파일명 변경
+  const handleTitleChange = (e) => {
+    setCourseTitle(e.target.value);
+  };
+  
+
   return (
     <div className="home">
       {isAuthenticatedContext && (
@@ -244,7 +262,10 @@ function Home({ setRecentSummaries, onLogout }) {
 
       {selectedFile && (
         <div className="selected-file">
-          <p>{selectedFile.name}</p>
+          <p>{courseTitle || selectedFile.name}</p>
+          <button onClick={handleCancelUpload}>
+            <FaRegTrashCan />
+          </button>
           {uploadProgress > 0 && loading && (
             <div className="progress-bar">
               <div className="progress" style={{ width: `${uploadProgress}%` }}></div>
@@ -265,7 +286,7 @@ function Home({ setRecentSummaries, onLogout }) {
               className="course-title-input"
               type="text"
               value={courseTitle}
-              onChange={(e) => setCourseTitle(e.target.value)}
+              onChange={handleTitleChange}
               placeholder="강의 제목"
             />
             <textarea
