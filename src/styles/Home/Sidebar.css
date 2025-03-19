@@ -1,0 +1,233 @@
+/* 로고 텍스트 URL */
+@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
+
+/* 로고 텍스트 */
+.logo {
+  font-family: 'Gaegu', sans-serif;
+  font-size: 30px;
+  font-weight: bold;
+  padding: 20px;
+}
+
+/* Sidebar 기본 스타일 */
+.sidebar {
+  width: 250px;
+  background-color: #f4f4f4;
+  position: fixed;
+  height: 100%;
+  transition: all 0.3s;
+  z-index: 1000; /* 사이드바가 항상 최상위에 있도록 설정 */
+}
+
+/* 사이드바 접었을 때 */
+.sidebar.collapsed {
+  width: 0px;
+}
+
+/* 사이드바가 접혔을 때 로고 숨기기 */
+.sidebar.collapsed .logo {
+  display: none;
+}
+
+/* 사이드바 접기 버튼 */
+.toggle-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  position: absolute;
+  left: 20px;
+  top: 25px;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  position: relative;
+}
+
+.sidebar-content {
+  padding: 20px;
+  z-index: 1000;
+}
+
+/* 사이드바 내용 스타일 */
+.sidebar-content ul {
+  list-style: none;
+  padding: 0px;
+  padding-top: 10px;
+}
+
+/* 홈 / 최신 / 내 서랍 버튼 스타일 */
+.sidebar-content li {
+  display: flex;
+  margin: 4px;
+  padding: 10px;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+/* 항목 아이콘 크기 조정 */
+.sidebar-content li svg {
+  font-size: 20px; /* 아이콘 크기 */
+}
+
+/* 홈과 내 서랍 사이 구분선 추가 */
+.sidebar-content ul > li {
+  border-bottom: 1px solid #ccc;
+}
+
+/* 마지막 li는 구분선 제거 */
+.sidebar-content ul > li:last-of-type {
+  border-bottom: none;
+}
+
+/* 최신 요약 리스트 */
+.recent-list {
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.recent-list li {
+  font-size: 14px;
+  padding: 5px 10px;
+  /* background: #f9f9f9; */
+  border-radius: 6px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.recent-list li:hover{
+  background: #e0e0e0;
+}
+.recent-list li.active {
+  background-color: #e0e0e0;  /* 선택된 항목 배경 색 */
+}
+
+
+/* 최근 항목(최근 요약) 버튼 스타일 */
+.recent-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 왼쪽은 아이콘+텍스트, 오른쪽은 토글 아이콘 */
+  padding: 10px;
+  gap: 8px;
+  
+  cursor: pointer;
+  border-bottom: 1px solid #ccc;
+}
+
+.recent-toggle .left-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 최신 항목의 더보기 버튼 정렬 */
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 더보기 아이콘을 오른쪽으로 배치 */
+.more-options-icon {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.more-options-menu {
+  position: absolute;
+  left: 90%;
+  background: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  min-width: 100px;
+}
+
+.more-options-menu button {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+}
+
+.more-options-menu button:hover {
+  background-color: #f0f0f0;
+}
+
+
+/* 펼치기/접기 아이콘 */
+.toggle-icon {
+  font-size: 14px;
+  color: #666;
+}
+
+
+/* 로그인/회원가입 버튼이 있는 항목 스타일 */
+.login-signup-button {
+  margin: 5px;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #FFC330;
+  border-radius: 8px;
+  width: 95%;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.logout-button{
+  margin: 5px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #FFC330;
+  border-radius: 8px;
+  width: 95%;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-info{
+  text-align: center;
+}
+
+.sidebar-content .user-info-container {
+  position: absolute;
+  bottom: 60px;
+  width: 85%;  /* 버튼을 푸터 위에 배치하려면 크기 조정 */
+  z-index: 100;
+}
+
+/* 사이드바 푸터 */
+.sidebar-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+/* 사이드바가 접혔을 때 푸터 숨기기 */
+.sidebar.collapsed .sidebar-footer {
+  display: none;
+}
+
+.sidebar-footer p {
+  font-size: 12px;
+  color: #888;
+}

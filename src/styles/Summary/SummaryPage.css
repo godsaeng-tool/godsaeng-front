@@ -1,0 +1,73 @@
+.summary-page {
+  padding: 5%;
+}
+
+.title h2 {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.iframe {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-tabs .nav-link {
+  color: #666;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px 8px 0 0;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #ffe08a; /* 연한 노랑 */
+  color: #000;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #ffc330; /* 진한 노랑 */
+  color: #000;
+  font-weight: bold;
+}
+
+
+
+
+/* .video-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 4%;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.tab-buttons button.active {
+  background-color: #ffc330;
+  color: black;
+  font-weight: bold;
+}
+
+.tab-content {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+} */
