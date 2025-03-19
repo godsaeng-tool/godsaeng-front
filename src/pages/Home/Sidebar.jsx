@@ -8,8 +8,10 @@ import { IoFolderOpenOutline } from "react-icons/io5";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
 import { BsLayoutSidebar } from "react-icons/bs";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import { FaCrown } from "react-icons/fa";
 
 import { useAppState } from "../../context/AppStateProvider";
+import { updateGodMode } from "../../api/authApi";
 import "../../styles/Home/Sidebar.css";
 
 function Sidebar({
@@ -25,11 +27,33 @@ function Sidebar({
   const { showEditModal, setShowEditModal, setRecentSummaries } = useAppState();
   const { isSidebarCollapsed, toggleSidebar, isRecentOpen, toggleRecentSummaries } = useAppState();
 
-  
+  const [isGodMode, setIsGodMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(null);
   const [localSummaries, setLocalSummaries] = useState(recentSummaries);
   const [activeIndex, setActiveIndex] = useState(null);
   const navigate = useNavigate();
+
+  const toggleGodMode = async () => {
+    setLoading(true);
+    try {
+      const newGodModeStatus = !isGodMode;
+      await updateGodMode(newGodModeStatus);
+      setIsGodMode(newGodModeStatus);
+      
+      if (newGodModeStatus) {
+        alert('갓생모드가 활성화되었습니다! 더 많은 기능을 이용해보세요.');
+      } else {
+        alert('갓생모드가 비활성화되었습니다.');
+      }
+    } catch (error) {
+      console.error('갓생모드 변경 실패:', error);
+      alert('갓생모드 변경에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSummaryClick = (lecture, index) => {
     setActiveIndex(index);
@@ -183,8 +207,9 @@ function Sidebar({
                   안녕하세요! {userName}님 ({userEmail})
                 </p>
               </div>
-              <button className="logout-button" onClick={onLogout}>
-                로그아웃
+              <button className="god-mode-button" onClick={toggleGodMode}>
+                <FaCrown className={`crown-icon ${isGodMode ? 'active' : ''}`} />
+                {loading ? '처리 중...' : isGodMode ? '갓생모드 활성화됨' : '갓생모드 구독'}
               </button>
             </div>
           )}

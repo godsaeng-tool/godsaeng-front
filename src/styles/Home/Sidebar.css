@@ -231,3 +231,36 @@
   font-size: 12px;
   color: #888;
 }
+
+/* 갓생모드 버튼 스타일 (로그아웃 버튼 스타일을 기반으로 수정) */
+.god-mode-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 5px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #FFC330;
+  border-radius: 8px;
+  width: 95%;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.god-mode-button:hover {
+  background-color: #FFB300;
+}
+
+.crown-icon {
+  font-size: 16px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.crown-icon.active {
+  color: #FFD700; /* 활성화된 상태에서는 금색으로 변경 */
+}
