@@ -52,6 +52,9 @@
 .sidebar-content {
   padding: 20px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 80px); /* 헤더와 푸터를 제외한 높이 */
 }
 
 /* 사이드바 내용 스타일 */
@@ -59,6 +62,7 @@
   list-style: none;
   padding: 0px;
   padding-top: 10px;
+  margin-bottom: 20px; /* 메뉴와 버튼 사이 간격 줄이기 */
 }
 
 /* 홈 / 최신 / 내 서랍 버튼 스타일 */
@@ -114,12 +118,12 @@
 .recent-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 왼쪽은 아이콘+텍스트, 오른쪽은 토글 아이콘 */
-  padding: 10px;
+  justify-content: space-between;
+  padding: 12px 10px; /* 상하 패딩 증가 */
   gap: 8px;
-  
   cursor: pointer;
   border-bottom: 1px solid #ccc;
+  height: 45px; /* 높이 명시적 지정 */
 }
 
 .recent-toggle .left-content {
@@ -131,43 +135,70 @@
 /* 최신 항목의 더보기 버튼 정렬 */
 .summary-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  width: 100%;
+  align-items: center;
+  padding: 0 10px;
+  height: 100%;
+  width: 100%; /* 너비 100%로 설정 */
 }
 
-/* 더보기 아이콘을 오른쪽으로 배치 */
+/* 강의 제목 스타일 */
+.summary-item span {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 5px;
+  max-width: 70%; /* 날짜 표시를 위해 너비 줄임 */
+}
+
+/* 더보기 아이콘 */
 .more-options-icon {
-  margin-left: auto;
+  opacity: 0;
   cursor: pointer;
+  transition: opacity 0.2s;
+  margin-left: auto; /* 오른쪽 끝으로 밀기 */
+  position: absolute; /* 절대 위치로 설정 */
+  right: 10px; /* 오른쪽에서 10px 떨어진 위치 */
+}
+
+/* 호버 시 더보기 아이콘 표시 */
+.summary-list-item:hover .more-options-icon {
+  opacity: 1;
 }
 
 .more-options-menu {
-  position: absolute;
-  left: 90%;
-  background: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  z-index: 10;
-  min-width: 100px;
+  position: fixed;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 140px; /* 너비 증가 */
 }
 
 .more-options-menu button {
-  border: none;
-  background: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
   padding: 8px 12px;
   text-align: left;
+  background: none;
+  border: none;
   cursor: pointer;
-  width: 100%;
-  font-size: 14px;
+  transition: background-color 0.2s;
+  gap: 8px; /* 아이콘과 텍스트 사이 간격 */
 }
 
 .more-options-menu button:hover {
   background-color: #f0f0f0;
 }
 
+/* 내 서랍에 넣기 아이콘 */
+.drawer-add-icon {
+  font-size: 16px;
+  color: #333;
+}
 
 /* 펼치기/접기 아이콘 */
 .toggle-icon {
@@ -208,10 +239,11 @@
 }
 
 .sidebar-content .user-info-container {
-  position: absolute;
-  bottom: 60px;
-  width: 85%;  /* 버튼을 푸터 위에 배치하려면 크기 조정 */
-  z-index: 100;
+  position: relative; /* absolute에서 relative로 변경 */
+  bottom: auto; /* 위치 고정 제거 */
+  width: 100%;
+  margin-top: auto; /* 상단 여백을 자동으로 설정하여 하단에 붙도록 함 */
+  padding-bottom: 20px; /* 하단 여백 추가 */
 }
 
 /* 사이드바 푸터 */
@@ -238,12 +270,11 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 5px;
-  margin-bottom: 20px;
+  margin: 5px 0; /* 상하 여백만 설정 */
   padding: 10px;
   background-color: #FFC330;
   border-radius: 8px;
-  width: 95%;
+  width: 100%; /* 너비 조정 */
   color: black;
   border: none;
   cursor: pointer;
@@ -263,4 +294,73 @@
 
 .crown-icon.active {
   color: #FFD700; /* 활성화된 상태에서는 금색으로 변경 */
+}
+
+/* 최근 강의 목록 스타일 수정 */
+.recent-summaries {
+  margin-left: 20px;
+  max-height: 300px; /* 기존 200px에서 300px로 증가 */
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+/* 요약 목록 아이템 */
+.summary-list-item {
+  position: relative;
+  padding: 10px 0; /* 상하 패딩 증가 */
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  min-height: 40px; /* 최소 높이 지정 */
+  display: flex;
+  align-items: center;
+}
+
+.summary-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.summary-list-item.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.summary-item span.active {
+  font-weight: bold;
+}
+
+/* 최근 강의 없을 때 메시지 */
+.no-summaries {
+  padding: 15px 0; /* 패딩 증가 */
+  text-align: center;
+  color: #888;
+}
+
+/* 날짜 그룹 스타일 */
+.date-group {
+  margin-bottom: 15px;
+}
+
+.date-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  padding: 5px 0;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 강의 날짜 표시 */
+.lecture-date {
+  font-size: 10px;
+  color: #888;
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+/* 로딩 메시지 */
+.loading-message {
+  padding: 15px 0;
+  text-align: center;
+  color: #888;
+  font-style: italic;
 }

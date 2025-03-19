@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 import { IoClose } from "react-icons/io5";
 import { HiOutlineHome } from "react-icons/hi2";
@@ -9,9 +11,11 @@ import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
 import { BsLayoutSidebar } from "react-icons/bs";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaCrown } from "react-icons/fa";
+import { MdOutlineAddToPhotos } from "react-icons/md";
 
 import { useAppState } from "../../context/AppStateProvider";
 import { updateGodMode } from "../../api/authApi";
+import { getUserRecentLectures, deleteLecture } from "../../api/lectureApi";
 import "../../styles/Home/Sidebar.css";
 
 function Sidebar({
@@ -29,11 +33,39 @@ function Sidebar({
 
   const [isGodMode, setIsGodMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [lecturesLoading, setLecturesLoading] = useState(false);
 
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(null);
-  const [localSummaries, setLocalSummaries] = useState(recentSummaries);
+  const [localSummaries, setLocalSummaries] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
   const navigate = useNavigate();
+
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [selectedLecture, setSelectedLecture] = useState(null);
+
+  const fetchLectures = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      setLecturesLoading(true);
+      const lectures = await getUserRecentLectures(10);
+      setLocalSummaries(lectures);
+      setRecentSummaries(lectures);
+    } catch (error) {
+      console.error('강의 목록 로딩 실패:', error);
+    } finally {
+      setLecturesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchLectures();
+    } else {
+      setLocalSummaries([]);
+      setRecentSummaries([]);
+    }
+  }, [isAuthenticated]);
 
   const toggleGodMode = async () => {
     setLoading(true);
@@ -76,45 +108,87 @@ function Sidebar({
     };
   }, []);
 
-  const handleMoreOptionsClick = (index) => {
+  const handleMoreOptionsClick = (index, event, lecture) => {
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX - 100,
+      });
+    }
+    
+    setSelectedLecture(lecture);
     setIsMoreOptionsOpen(isMoreOptionsOpen === index ? null : index);
   };
 
-  useEffect(() => {
-    const storedSummaries =
-      JSON.parse(localStorage.getItem(`recentSummaries_${userEmail}`)) || [];
-    setLocalSummaries(storedSummaries);
-  }, [recentSummaries, userEmail]);
-
-  useEffect(() => {
-    setLocalSummaries(recentSummaries);
-  }, [recentSummaries]);
-
-  const handleDelete = (index) => {
-    const newSummaries = localSummaries.filter((_, i) => i !== index);
-    setLocalSummaries(newSummaries);
-    setRecentSummaries(newSummaries);
-    localStorage.setItem(
-      `recentSummaries_${userEmail}`,
-      JSON.stringify(newSummaries)
-    );
-    setIsMoreOptionsOpen(null);
+  const handleDelete = async (index) => {
+    if (!selectedLecture) return;
+    
+    if (window.confirm("이 항목을 삭제하시겠습니까?")) {
+      try {
+        await deleteLecture(selectedLecture.id);
+        
+        fetchLectures();
+        setIsMoreOptionsOpen(null);
+      } catch (error) {
+        console.error('강의 삭제 실패:', error);
+        alert('강의 삭제에 실패했습니다.');
+      }
+    }
   };
 
   const handleEdit = (index) => {
-    setEditTitle(localSummaries[index]);
+    setEditTitle(localSummaries[index].title);
     setEditIndex(index);
     setShowEditModal(true);
     setIsMoreOptionsOpen(null);
   };
 
-  // 사이드바에서 항목 클릭 시 해당 강의로 이동
-  // const Sidebar = ({ recentSummaries }) => {
-  // const navigate = useNavigate();
+  const handleAddToDrawer = (index) => {
+    alert('내서랍 추가(구현전)');
+    setIsMoreOptionsOpen(null);
+  };
 
-  // const handleClickSummary = (summary) => {
-  //   navigate(`/summary/${summary.id}`, { state: { summary } });
-  // };
+  const groupLecturesByDate = (lectures) => {
+    const sortedLectures = [...lectures].sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const grouped = {
+      today: [],
+      yesterday: [],
+      earlier: []
+    };
+
+    sortedLectures.forEach(lecture => {
+      try {
+        const date = parseISO(lecture.createdAt);
+        
+        if (isToday(date)) {
+          grouped.today.push(lecture);
+        } else if (isYesterday(date)) {
+          grouped.yesterday.push(lecture);
+        } else {
+          grouped.earlier.push(lecture);
+        }
+      } catch (error) {
+        grouped.earlier.push(lecture);
+      }
+    });
+
+    return grouped;
+  };
+
+  const formatDate = (dateString) => {
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'MM월 dd일', { locale: ko });
+    } catch (error) {
+      return '날짜 없음';
+    }
+  };
+
+  const groupedLectures = groupLecturesByDate(localSummaries);
 
   return (
     <div className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
@@ -126,74 +200,124 @@ function Sidebar({
 
       {!isSidebarCollapsed && (
         <div className="sidebar-content">
-          <ul>
-            <li onClick={onHomeClick}>
-              <HiOutlineHome /> 홈
-            </li>
+          <div className="menu-container">
+            <ul>
+              <li onClick={onHomeClick}>
+                <HiOutlineHome /> 홈
+              </li>
 
-            <li onClick={toggleRecentSummaries} className="recent-toggle">
-              <div className="left-content">
-                <GoClock /> <span>최근</span>
-              </div>
-              {isRecentOpen ? (
-                <FaAngleUp className="toggle-icon" />
-              ) : (
-                <FaAngleDown className="toggle-icon" />
-              )}
-            </li>
-
-            {isRecentOpen && (
-              <ul className="recent-summaries">
-                {recentSummaries.length > 0 ? (
-                  recentSummaries.map((lecture, index) => (
-                    <li
-                      key={lecture.id}
-                      className={activeIndex === index ? "active" : ""}
-                      onClick={() => onSummaryClick(lecture, index)}
-                    >
-                      <div className="summary-item">
-                        <span>{lecture.title}</span>
-                      </div>
-                    </li>
-                  ))
-                ) : (
-                  <li className="no-summaries">최근 강의가 없습니다</li>
-                )}
-              </ul>
-            )}
-
-            {/* 강의 제목 변경 모달창 */}
-            {showEditModal && (
-              <div
-                className="modal-overlay"
-                onClick={() => setShowEditModal(false)}
-              >
-                <div
-                  className="course-edit-modal"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <p className="course-title">강의 제목 변경</p>
-                  <button
-                    className="close-button"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    <IoClose />
-                  </button>
-                  <input
-                    className="course-title-input"
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                  />
-                  <button onClick={handleSaveEdit}>저장</button>{" "}
+              <li onClick={toggleRecentSummaries} className="recent-toggle">
+                <div className="left-content">
+                  <GoClock /> <span>최근</span>
                 </div>
-              </div>
-            )}
+                {isRecentOpen ? (
+                  <FaAngleUp className="toggle-icon" />
+                ) : (
+                  <FaAngleDown className="toggle-icon" />
+                )}
+              </li>
 
-            {/* <li>
-              <IoFolderOpenOutline /> 내 서랍
-            </li> */}
-          </ul>
+              {isRecentOpen && (
+                <ul className="recent-summaries">
+                  {lecturesLoading ? (
+                    <li className="loading-message">강의 목록 로딩 중...</li>
+                  ) : localSummaries.length > 0 ? (
+                    <>
+                      {groupedLectures.today.length > 0 && (
+                        <div className="date-group">
+                          <div className="date-header">오늘</div>
+                          {groupedLectures.today.map((lecture, index) => (
+                            <li
+                              key={lecture.id}
+                              className={`summary-list-item ${activeIndex === `today-${index}` ? "active" : ""}`}
+                            >
+                              <div className="summary-item">
+                                <span
+                                  onClick={() => onSummaryClick(lecture, `today-${index}`)}
+                                  className={activeIndex === `today-${index}` ? "active" : ""}
+                                >
+                                  {lecture.title}
+                                </span>
+                                <HiOutlineDotsHorizontal
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoreOptionsClick(`today-${index}`, e, lecture);
+                                  }}
+                                  className="more-options-icon"
+                                />
+                              </div>
+                            </li>
+                          ))}
+                        </div>
+                      )}
+
+                      {groupedLectures.yesterday.length > 0 && (
+                        <div className="date-group">
+                          <div className="date-header">어제</div>
+                          {groupedLectures.yesterday.map((lecture, index) => (
+                            <li
+                              key={lecture.id}
+                              className={`summary-list-item ${activeIndex === `yesterday-${index}` ? "active" : ""}`}
+                            >
+                              <div className="summary-item">
+                                <span
+                                  onClick={() => onSummaryClick(lecture, `yesterday-${index}`)}
+                                  className={activeIndex === `yesterday-${index}` ? "active" : ""}
+                                >
+                                  {lecture.title}
+                                </span>
+                                <HiOutlineDotsHorizontal
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoreOptionsClick(`yesterday-${index}`, e, lecture);
+                                  }}
+                                  className="more-options-icon"
+                                />
+                              </div>
+                            </li>
+                          ))}
+                        </div>
+                      )}
+
+                      {groupedLectures.earlier.length > 0 && (
+                        <div className="date-group">
+                          <div className="date-header">이전</div>
+                          {groupedLectures.earlier.map((lecture, index) => (
+                            <li
+                              key={lecture.id}
+                              className={`summary-list-item ${activeIndex === `earlier-${index}` ? "active" : ""}`}
+                            >
+                              <div className="summary-item">
+                                <span
+                                  onClick={() => onSummaryClick(lecture, `earlier-${index}`)}
+                                  className={activeIndex === `earlier-${index}` ? "active" : ""}
+                                >
+                                  {lecture.title}
+                                </span>
+                                <HiOutlineDotsHorizontal
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoreOptionsClick(`earlier-${index}`, e, lecture);
+                                  }}
+                                  className="more-options-icon"
+                                />
+                              </div>
+                            </li>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <li className="no-summaries">최근 강의가 없습니다</li>
+                  )}
+                </ul>
+              )}
+
+              {/* <li>
+                <IoFolderOpenOutline /> 내 서랍
+              </li> */}
+            </ul>
+          </div>
 
           {/* 로그인 상태에 따라 버튼 변경 */}
           {!isAuthenticated ? (
@@ -213,12 +337,26 @@ function Sidebar({
               </button>
             </div>
           )}
+
+          <div className="sidebar-footer">
+            <p>© 갓생살기</p>
+          </div>
         </div>
       )}
 
-      <div className="sidebar-footer">
-        <p>© 갓생살기</p>
-      </div>
+      {isMoreOptionsOpen !== null && (
+        <div 
+          className="more-options-menu" 
+          style={{ top: `${menuPosition.top}px`, left: `${menuPosition.left}px` }}
+        >
+          <button onClick={() => handleDelete(isMoreOptionsOpen)}>
+            삭제
+          </button>
+          <button onClick={() => handleAddToDrawer(isMoreOptionsOpen)}>
+            내 서랍에 넣기
+          </button>
+        </div>
+      )}
     </div>
   );
 }

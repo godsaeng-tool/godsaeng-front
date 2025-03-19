@@ -14,7 +14,7 @@ export const AppStateProvider = ({ children }) => {
   const [userName, setUserName] = useState("");
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRecentOpen, setIsRecentOpen] = useState(false);
+  const [isRecentOpen, setIsRecentOpen] = useState(true);
   const [recentSummaries, setRecentSummaries] = useState([]);
 
   const [editTitle, setEditTitle] = useState("");
@@ -48,19 +48,19 @@ export const AppStateProvider = ({ children }) => {
 
   // 로그인 성공 시 호출하는 함수
   const handleLoginSuccess = async (email, name) => {
-    console.log("로그인 성공:", email, name);
     setIsAuthenticated(true);
     setUserEmail(email);
     setUserName(name);
-
+    setShowLogin(false);
+    setShowSignup(false);
+    setShowAuthPopup(false);
+    
     localStorage.setItem("userEmail", email);
     localStorage.setItem("userName", name);
-
-    setShowAuthPopup(false);
     
     // 최근 강의 목록 가져오기
     try {
-      const recentLectures = await getUserRecentLectures(5);
+      const recentLectures = await getUserRecentLectures(10); // 최근 10개 가져오기
       setRecentSummaries(recentLectures);
     } catch (error) {
       console.error("최근 강의 목록 로딩 실패:", error);
