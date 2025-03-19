@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
 
@@ -25,6 +25,10 @@ function AppContent() {
     handleLogout,
     handleLoginSuccess,
   } = useAppState();
+
+  useEffect(() => {
+    console.log("로그인 상태 변경:", isAuthenticated);
+  }, [isAuthenticated]);
 
   const handleLoginClick = () => {
     setShowLogin(true);

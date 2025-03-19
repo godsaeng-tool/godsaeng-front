@@ -7,9 +7,12 @@ import { IoClose } from "react-icons/io5";
 import { isAuthenticated } from '../../utils/tokenUtils';
 import { createYoutubeLecture, uploadLecture, getLectures } from '../../api/lectureApi';
 import { getCurrentUser } from '../../api/authApi';
+import { useAppState } from '../../context/AppStateProvider';
 import '../../styles/Home/Home.css';
 
 function Home({ setRecentSummaries, onLogout }) {
+  const { isAuthenticated: isAuthenticatedContext, userEmail, userName } = useAppState();
+  
   const [selectedFile, setSelectedFile] = useState(null);
   const [urlInput, setUrlInput] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
@@ -17,7 +20,6 @@ function Home({ setRecentSummaries, onLogout }) {
   const [showCourseInput, setShowCourseInput] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -26,24 +28,26 @@ function Home({ setRecentSummaries, onLogout }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setIsLoggedIn(isAuthenticated());
-    
-    if (isAuthenticated()) {
+    if (isAuthenticatedContext) {
       fetchUserInfo();
+    } else {
+      setUserInfo(null);
     }
-  }, []);
+  }, [isAuthenticatedContext]);
 
   const fetchUserInfo = async () => {
     try {
-      const userData = await getCurrentUser();
-      setUserInfo(userData);
+      setUserInfo({
+        username: userName,
+        email: userEmail
+      });
     } catch (error) {
       console.error('사용자 정보 로딩 실패:', error);
     }
   };
 
   const handleFileChange = (event) => {
-    if (!isLoggedIn) {
+    if (!isAuthenticatedContext) {
       setErrorMessage("먼저 로그인을 해주세요.");
       setShowErrorModal(true);
       return;
@@ -71,7 +75,7 @@ function Home({ setRecentSummaries, onLogout }) {
 
   // 요약 버튼 클릭 시
   const handleSummarize = async () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticatedContext) {
       setErrorMessage("먼저 로그인을 해주세요.");
       setShowErrorModal(true);
       return;
@@ -179,7 +183,7 @@ function Home({ setRecentSummaries, onLogout }) {
 
   return (
     <div className="home">
-      {isLoggedIn && (
+      {isAuthenticatedContext && (
         <div className="user-icon-container">
           <FaUser className="user-icon" onClick={handleUserIconClick} />
           {showUserMenu && (
@@ -221,7 +225,7 @@ function Home({ setRecentSummaries, onLogout }) {
       </div>
 
       <div className="upload-buttons">
-        <button onClick={() => isLoggedIn ? document.getElementById('fileInput').click() : setShowErrorModal(true)} disabled={loading}>
+        <button onClick={() => isAuthenticatedContext ? document.getElementById('fileInput').click() : setShowErrorModal(true)} disabled={loading}>
           <HiOutlineUpload /> 업로드
         </button>
         <input
@@ -233,7 +237,7 @@ function Home({ setRecentSummaries, onLogout }) {
           disabled={loading}
         />
 
-        <button onClick={() => isLoggedIn ? setShowCourseInput(true) : setShowErrorModal(true)} disabled={loading}>
+        <button onClick={() => isAuthenticatedContext ? setShowCourseInput(true) : setShowErrorModal(true)} disabled={loading}>
           <FaPen /> 강의 정보 입력
         </button>
       </div>

@@ -68,21 +68,24 @@ export const AppStateProvider = ({ children }) => {
     }
   };
 
-  // 로그아웃 함수 수정
+  // 로그아웃 함수 개선
   const handleLogout = () => {
+    // 토큰 제거
+    removeTokens();
+    
+    // 상태 초기화
     setIsAuthenticated(false);
     setUserEmail("");
     setUserName("");
     setRecentSummaries([]);
-
-    // 토큰 삭제
-    removeTokens();
     
+    // 로컬 스토리지 정리
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userName");
     localStorage.removeItem(`recentSummaries_${userEmail}`);
 
-    setShowAuthPopup(true);
+    // 홈으로 리다이렉트
+    window.location.href = "/";
   };
 
   // 사이드바 토글
