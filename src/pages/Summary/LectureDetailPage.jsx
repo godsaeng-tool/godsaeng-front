@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 import jsPDF from "jspdf";
 import font from "./NotoSansKR-Regular-normal.js";
 import {
-  Container, Row, Col, Card, Nav, Tab, Alert, Button, Spinner, Modal, Dropdown,
+  Container,
+  Row,
+  Col,
+  Card,
+  Nav,
+  Tab,
+  Alert,
+  Button,
+  Spinner,
+  Modal,
+  Dropdown,
 } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getLectureDetail, deleteLecture } from "../../api/lectureApi";
@@ -19,9 +29,9 @@ const QuizParser = ({ quizText }) => {
 
   // 정답 보기/숨기기 토글
   const toggleAnswer = (index) => {
-    setVisibleAnswers(prev => ({
+    setVisibleAnswers((prev) => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !prev[index],
     }));
   };
 
@@ -30,44 +40,47 @@ const QuizParser = ({ quizText }) => {
   // 퀴즈 데이터 파싱 함수
   const parseQuizItems = () => {
     // 빈 줄로 항목 구분을 방지하기 위해 연속된 빈 줄을 하나로 줄이기
-    const normalizedText = quizText.replace(/\n{3,}/g, '\n\n');
-    const lines = normalizedText.split('\n').map(line => line.trim());
+    const normalizedText = quizText.replace(/\n{3,}/g, "\n\n");
+    const lines = normalizedText.split("\n").map((line) => line.trim());
     const quizItems = [];
-    
+
     let currentQuiz = null;
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      
+
       // 숫자로 시작하는 줄이고 "문제" 단어가 포함된 경우 = 새로운 문제
-      if (line.match(/^\d+\./) && (line.includes('문제') || line.includes('**문제**'))) {
+      if (
+        line.match(/^\d+\./) &&
+        (line.includes("문제") || line.includes("**문제**"))
+      ) {
         // 새 퀴즈 항목 시작
         if (currentQuiz) {
           quizItems.push(currentQuiz);
         }
-        
+
         currentQuiz = {
           id: quizItems.length,
           question: line,
-          answer: null
+          answer: null,
         };
-      } 
+      }
       // 정답 줄 찾기
-      else if (line.includes('정답') && currentQuiz && !currentQuiz.answer) {
+      else if (line.includes("정답") && currentQuiz && !currentQuiz.answer) {
         currentQuiz.answer = line;
       }
     }
-    
+
     // 마지막 퀴즈 추가
     if (currentQuiz) {
       quizItems.push(currentQuiz);
     }
-    
+
     return quizItems;
   };
 
   const quizItems = parseQuizItems();
-  
+
   // 파싱된 결과가 없으면 원본 표시
   if (quizItems.length === 0) {
     return <ReactMarkdown>{quizText}</ReactMarkdown>;
@@ -79,19 +92,24 @@ const QuizParser = ({ quizText }) => {
         <div key={quiz.id} className="quiz-item mb-4">
           {/* 문제 표시 */}
           <p className="quiz-question-text">
-            <span className="question-number">{quiz.question.match(/^\d+\./) ? quiz.question.match(/^\d+\./)[0] : ''}</span>{' '}
+            <span className="question-number">
+              {quiz.question.match(/^\d+\./)
+                ? quiz.question.match(/^\d+\./)[0]
+                : ""}
+            </span>{" "}
             <span className="question-content">
-              {quiz.question.replace(/^\d+\.\s+(\*\*)?문제(\*\*)?:?(\s+)?/, '').trim()}
+              {quiz.question
+                .replace(/^\d+\.\s+(\*\*)?문제(\*\*)?:?(\s+)?/, "")
+                .trim()}
             </span>
           </p>
-          
+
           {/* 정답 표시 - 토글 방식 */}
           {!visibleAnswers[quiz.id] ? (
             <div className="quiz-answer-section mt-3">
               <Button
-                variant="outline-primary"
                 onClick={() => toggleAnswer(quiz.id)}
-                className="show-answer-btn"
+                className="show-answer-btn custom-yellow-btn"
               >
                 <FaEye className="me-2" /> 정답 보기
               </Button>
@@ -99,8 +117,10 @@ const QuizParser = ({ quizText }) => {
           ) : (
             <div className="quiz-answer p-3 rounded mt-3">
               <div className="answer-content">
-                <strong className="answer-label">정답:</strong> 
-                <span className="answer-text">{quiz.answer.replace(/.*정답.*:\s*/, '').trim()}</span>
+                <strong className="answer-label">정답:</strong>
+                <span className="answer-text">
+                  {quiz.answer.replace(/.*정답.*:\s*/, "").trim()}
+                </span>
               </div>
               <Button
                 variant="outline-secondary"
@@ -126,47 +146,50 @@ const Quiz = ({ quizText }) => {
     if (!quizText) return;
 
     const parseQuizText = (text) => {
-      const lines = text.split('\n').filter(line => line.trim());
+      const lines = text.split("\n").filter((line) => line.trim());
       const parsedQuizzes = [];
-      
+
       // 질문과 답변 쌍을 찾기
       for (let i = 0; i < lines.length; i++) {
         const questionLine = lines[i];
         const answerLine = i + 1 < lines.length ? lines[i + 1] : null;
-        
+
         // 질문 라인인지 확인 (예: "1. **문제:** 질문내용")
         if (questionLine.match(/^\d+\.\s+\*\*문제:/)) {
           // 다음 라인이 답변인지 확인
-          if (answerLine && answerLine.includes('**정답:**')) {
+          if (answerLine && answerLine.includes("**정답:**")) {
             const number = questionLine.match(/^\d+\./)[0];
-            const question = questionLine.replace(/^\d+\.\s+\*\*문제:\*\*\s*/, '');
-            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, '');
-            
+            const question = questionLine.replace(
+              /^\d+\.\s+\*\*문제:\*\*\s*/,
+              ""
+            );
+            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, "");
+
             parsedQuizzes.push({
               id: parsedQuizzes.length,
               number: number,
               question: question,
-              answer: answer
+              answer: answer,
             });
-            
+
             // 답변 라인을 건너뜀
             i++;
           }
         }
       }
-      
+
       return parsedQuizzes;
     };
-    
+
     const parsedQuizzes = parseQuizText(quizText);
     console.log("파싱된 퀴즈:", parsedQuizzes); // 디버깅용
     setQuizItems(parsedQuizzes);
   }, [quizText]);
 
   const toggleAnswer = (quizId) => {
-    setVisibleAnswers(prev => ({
+    setVisibleAnswers((prev) => ({
       ...prev,
-      [quizId]: !prev[quizId]
+      [quizId]: !prev[quizId],
     }));
   };
 
@@ -187,12 +210,12 @@ const Quiz = ({ quizText }) => {
             <span className="quiz-number">{quiz.number}</span>
             <span className="quiz-text">{quiz.question}</span>
           </div>
-          
+
           <div className="quiz-answer-section">
             {!visibleAnswers[quiz.id] ? (
-              <Button 
-                variant="outline-primary" 
-                size="sm" 
+              <Button
+                variant="outline-primary"
+                size="sm"
                 onClick={() => toggleAnswer(quiz.id)}
                 className="show-answer-btn"
               >
@@ -202,9 +225,9 @@ const Quiz = ({ quizText }) => {
               <div className="quiz-answer">
                 <div className="answer-label">정답:</div>
                 <div className="answer-text">{quiz.answer}</div>
-                <Button 
-                  variant="outline-secondary" 
-                  size="sm" 
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
                   onClick={() => toggleAnswer(quiz.id)}
                   className="hide-answer-btn mt-2"
                 >
@@ -227,47 +250,50 @@ const SimpleQuiz = ({ quizText }) => {
     if (!quizText) return;
 
     const parseQuizText = (text) => {
-      const lines = text.split('\n').filter(line => line.trim());
+      const lines = text.split("\n").filter((line) => line.trim());
       const parsedQuizzes = [];
-      
+
       // 질문과 답변 쌍을 찾기
       for (let i = 0; i < lines.length; i++) {
         const questionLine = lines[i];
         const answerLine = i + 1 < lines.length ? lines[i + 1] : null;
-        
+
         // 질문 라인인지 확인 (예: "1. **문제:** 질문내용")
         if (questionLine.match(/^\d+\.\s+\*\*문제:/)) {
           // 다음 라인이 답변인지 확인
-          if (answerLine && answerLine.includes('**정답:**')) {
+          if (answerLine && answerLine.includes("**정답:**")) {
             const number = questionLine.match(/^\d+\./)[0];
-            const question = questionLine.replace(/^\d+\.\s+\*\*문제:\*\*\s*/, '');
-            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, '');
-            
+            const question = questionLine.replace(
+              /^\d+\.\s+\*\*문제:\*\*\s*/,
+              ""
+            );
+            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, "");
+
             parsedQuizzes.push({
               id: parsedQuizzes.length,
               number: number,
               question: question,
-              answer: answer
+              answer: answer,
             });
-            
+
             // 답변 라인을 건너뜀
             i++;
           }
         }
       }
-      
+
       return parsedQuizzes;
     };
-    
+
     const parsedQuizzes = parseQuizText(quizText);
     console.log("파싱된 퀴즈:", parsedQuizzes); // 디버깅용
     setQuizItems(parsedQuizzes);
   }, [quizText]);
 
   const toggleAnswer = (quizId) => {
-    setVisibleAnswers(prev => ({
+    setVisibleAnswers((prev) => ({
       ...prev,
-      [quizId]: !prev[quizId]
+      [quizId]: !prev[quizId],
     }));
   };
 
@@ -288,12 +314,12 @@ const SimpleQuiz = ({ quizText }) => {
             <span className="quiz-number">{quiz.number}</span>
             <span className="quiz-text">{quiz.question}</span>
           </div>
-          
+
           <div className="quiz-answer-section">
             {!visibleAnswers[quiz.id] ? (
-              <Button 
-                variant="outline-primary" 
-                size="sm" 
+              <Button
+                variant="outline-primary"
+                size="sm"
                 onClick={() => toggleAnswer(quiz.id)}
                 className="show-answer-btn"
               >
@@ -303,9 +329,9 @@ const SimpleQuiz = ({ quizText }) => {
               <div className="quiz-answer">
                 <div className="answer-label">정답:</div>
                 <div className="answer-text">{quiz.answer}</div>
-                <Button 
-                  variant="outline-secondary" 
-                  size="sm" 
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
                   onClick={() => toggleAnswer(quiz.id)}
                   className="hide-answer-btn mt-2"
                 >
@@ -332,13 +358,13 @@ const LectureDetailPage = () => {
   const navigate = useNavigate();
 
   // 사이드바 상태와 갓생모드 관련 상태/함수 가져오기
-  const { 
-    isSidebarCollapsed, 
-    isGodMode, 
-    toggleGodMode, 
+  const {
+    isSidebarCollapsed,
+    isGodMode,
+    toggleGodMode,
     isAuthenticated,
     userName,
-    handleLogout
+    handleLogout,
   } = useAppState();
   const [subscribing, setSubscribing] = useState(false);
 
@@ -430,10 +456,10 @@ const LectureDetailPage = () => {
     setDeleting(true);
     try {
       await deleteLecture(lectureId);
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error('강의 삭제 실패:', error);
-      alert('강의 삭제에 실패했습니다.');
+      console.error("강의 삭제 실패:", error);
+      alert("강의 삭제에 실패했습니다.");
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);
@@ -557,16 +583,24 @@ const LectureDetailPage = () => {
   );
 
   return (
-    <Container className={`my-4 lecture-detail-container ${isSidebarCollapsed ? "collapsed" : ""}`}>
+    <Container
+      className={`my-4 lecture-detail-container ${
+        isSidebarCollapsed ? "collapsed" : ""
+      }`}
+    >
       <Row className="mb-4">
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <h2 className="lecture-title">{lecture.title}</h2>
-            
+
             {/* 유저 아이콘 및 드롭다운 메뉴 */}
             {isAuthenticated && (
               <Dropdown align="end" className="user-dropdown">
-                <Dropdown.Toggle variant="link" id="user-dropdown" className="user-icon-button">
+                <Dropdown.Toggle
+                  variant="link"
+                  id="user-dropdown"
+                  className="user-icon-button"
+                >
                   <FaUser className="user-icon" />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
@@ -577,7 +611,9 @@ const LectureDetailPage = () => {
               </Dropdown>
             )}
           </div>
-          {lecture.description && <p className="text-muted">{lecture.description}</p>}
+          {lecture.description && (
+            <p className="text-muted">{lecture.description}</p>
+          )}
         </Col>
       </Row>
 
@@ -595,14 +631,30 @@ const LectureDetailPage = () => {
         <Col md={8}>
           <Card className="mb-4 lecture-card">
             <Card.Header>
-              <Nav variant="tabs" defaultActiveKey="summary" onSelect={setActiveTab} className="custom-nav-tabs">
-                <Nav.Item><Nav.Link eventKey="summary">요약</Nav.Link></Nav.Item>
-                <Nav.Item><Nav.Link eventKey="transcript">전체 스크립트</Nav.Link></Nav.Item>
-                <Nav.Item><Nav.Link eventKey="questions">예상 질문</Nav.Link></Nav.Item>
+              <Nav
+                variant="tabs"
+                defaultActiveKey="summary"
+                onSelect={setActiveTab}
+                className="custom-nav-tabs"
+              >
+                <Nav.Item>
+                  <Nav.Link eventKey="summary">요약</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="transcript">전체 스크립트</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="questions">예상 질문</Nav.Link>
+                </Nav.Item>
                 <Nav.Item>
                   <Nav.Link eventKey="studyplan">
                     학습 계획
-                    {!isGodMode && <FaCrown className="ms-1" style={{ fontSize: '0.8rem', color: '#FFC330' }} />}
+                    {!isGodMode && (
+                      <FaCrown
+                        className="ms-1"
+                        style={{ fontSize: "0.8rem", color: "#FFC330" }}
+                      />
+                    )}
                   </Nav.Link>
                 </Nav.Item>
               </Nav>
@@ -639,7 +691,10 @@ const LectureDetailPage = () => {
                     </Button>
                   </div>
                 </Tab.Pane>
-                <Tab.Pane eventKey="transcript" active={activeTab === "transcript"}>
+                <Tab.Pane
+                  eventKey="transcript"
+                  active={activeTab === "transcript"}
+                >
                   <h4>전체 스크립트</h4>
                   <div className="lecture-tab-content transcript-content">
                     {lecture.transcript ? (
@@ -647,7 +702,9 @@ const LectureDetailPage = () => {
                         <ReactMarkdown>{lecture.transcript}</ReactMarkdown>
                       </div>
                     ) : (
-                      <div className="no-content">스크립트 정보가 없습니다.</div>
+                      <div className="no-content">
+                        스크립트 정보가 없습니다.
+                      </div>
                     )}
                   </div>
                   <div className="download-btn-group mt-3">
@@ -669,7 +726,10 @@ const LectureDetailPage = () => {
                     </Button>
                   </div>
                 </Tab.Pane>
-                <Tab.Pane eventKey="questions" active={activeTab === "questions"}>
+                <Tab.Pane
+                  eventKey="questions"
+                  active={activeTab === "questions"}
+                >
                   <h4>예상 질문</h4>
                   <div className="lecture-tab-content questions-content">
                     {lecture.expectedQuestions ? (
@@ -677,7 +737,9 @@ const LectureDetailPage = () => {
                         <QuizParser quizText={lecture.expectedQuestions} />
                       </div>
                     ) : (
-                      <div className="no-content">예상 질문 정보가 없습니다.</div>
+                      <div className="no-content">
+                        예상 질문 정보가 없습니다.
+                      </div>
                     )}
                   </div>
                   <div className="download-btn-group mt-3">
@@ -707,7 +769,10 @@ const LectureDetailPage = () => {
                     </Button>
                   </div>
                 </Tab.Pane>
-                <Tab.Pane eventKey="studyplan" active={activeTab === "studyplan"}>
+                <Tab.Pane
+                  eventKey="studyplan"
+                  active={activeTab === "studyplan"}
+                >
                   <h4>학습 계획</h4>
                   {isGodMode ? (
                     <>
@@ -717,7 +782,9 @@ const LectureDetailPage = () => {
                             <ReactMarkdown>{lecture.studyPlan}</ReactMarkdown>
                           </div>
                         ) : (
-                          <div className="no-content">학습 계획 정보가 없습니다.</div>
+                          <div className="no-content">
+                            학습 계획 정보가 없습니다.
+                          </div>
                         )}
                       </div>
                       <div className="download-btn-group mt-3">
@@ -735,7 +802,13 @@ const LectureDetailPage = () => {
                         </Button>
                         <Button
                           className="pdf-download-btn"
-                          onClick={() =>handleDownload("studyplan", lecture.studyPlan,"pdf")}
+                          onClick={() =>
+                            handleDownload(
+                              "studyplan",
+                              lecture.studyPlan,
+                              "pdf"
+                            )
+                          }
                         >
                           학습계획 PDF 다운로드
                         </Button>
@@ -769,18 +842,20 @@ const LectureDetailPage = () => {
         </Modal.Header>
         <Modal.Body>
           <p>정말로 "{lecture?.title}" 강의를 삭제하시겠습니까?</p>
-          <p className="text-danger">이 작업은 되돌릴 수 없으며, 모든 채팅 기록도 함께 삭제됩니다.</p>
+          <p className="text-danger">
+            이 작업은 되돌릴 수 없으며, 모든 채팅 기록도 함께 삭제됩니다.
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseDeleteModal}>
             취소
           </Button>
-          <Button 
-            variant="danger" 
+          <Button
+            variant="danger"
             onClick={handleDeleteLecture}
             disabled={deleting}
           >
-            {deleting ? '삭제 중...' : '삭제'}
+            {deleting ? "삭제 중..." : "삭제"}
           </Button>
         </Modal.Footer>
       </Modal>

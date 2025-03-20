@@ -1,3 +1,31 @@
+/* 유저 아이콘 스타일 */
+.user-icon-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  color: #333;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.user-icon-button:hover,
+.user-icon-button:focus {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.user-icon-button::after {
+  display: none !important;
+}
+
+.user-icon {
+  font-size: 1.5rem;
+}
+
 .lecture-detail-container,
 .center-container {
   /* transition: margin-left 0.7s ease-in-out; */
@@ -66,34 +94,6 @@
 
 .custom-nav-tabs {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* 유저 아이콘 스타일 */
-.user-icon-button {
-  background: none;
-  border: none;
-  padding: 8px;
-  color: #333;
-  font-size: 1.2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
-}
-
-.user-icon-button:hover,
-.user-icon-button:focus {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #333;
-}
-
-.user-icon-button::after {
-  display: none !important;
-}
-
-.user-icon {
-  font-size: 1.5rem;
 }
 
 .user-dropdown .dropdown-menu {
@@ -454,7 +454,7 @@
 }
 
 .question-number {
-  color: #4b7bec;
+  color: #ffc330;
   font-weight: 700;
   margin-right: 4px;
 }
@@ -470,7 +470,7 @@
 }
 
 .show-answer-btn {
-  background-color: #4b7bec;
+  background-color: #ffc330;
   color: white;
   border: none;
   border-radius: 8px;
@@ -482,7 +482,7 @@
 }
 
 .show-answer-btn:hover {
-  background-color: #3867d6;
+  background-color: #ffc330;
   color: white;
 }
 
@@ -490,7 +490,7 @@
   background-color: #f0f7ff;
   padding: 16px;
   border-radius: 8px;
-  border-left: 4px solid #4b7bec;
+  border-left: 4px solid #ffc330;
   margin-top: 12px;
 }
 
@@ -502,7 +502,7 @@
 }
 
 .answer-label {
-  color: #4b7bec;
+  color: #ffc330;
   font-weight: 600;
   margin-right: 6px;
 }
@@ -529,4 +529,16 @@
   display: inline-block;
   font-weight: 500;
   color: #34495e;
+}
+
+.custom-yellow-btn {
+  background-color: #ffffff !important;
+  border: 1px solid #FFC330 !important;
+  color: #000 !important;
+}
+
+.custom-yellow-btn:hover {
+  background-color: #FFC330 !important;
+  border-color: #FFC330 !important;
+  color: #000 !important;
 }
