@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import ReactMarkdown from 'react-markdown';
 import jsPDF from "jspdf";
 import font from "./NotoSansKR-Regular-normal.js";
 import {
@@ -6,11 +7,318 @@ import {
 } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getLectureDetail, deleteLecture } from "../../api/lectureApi";
-import { FaCrown, FaUser } from "react-icons/fa";
+import { FaCrown, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAppState } from "../../context/AppStateProvider";
 import Loading from "../../components/common/Loading";
 import ChatInterface from "../../components/chat/ChatInterface";
 import "../../styles/Summary/LectureDetailPage.css";
+
+// QuizParser 컴포넌트: 퀴즈 텍스트를 파싱하여 질문과 정답을 구분해 표시합니다.
+const QuizParser = ({ quizText }) => {
+  const [visibleAnswers, setVisibleAnswers] = useState({});
+
+  // 정답 보기/숨기기 토글
+  const toggleAnswer = (index) => {
+    setVisibleAnswers(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  if (!quizText) return null;
+
+  // 퀴즈 데이터 파싱 함수
+  const parseQuizItems = () => {
+    // 빈 줄로 항목 구분을 방지하기 위해 연속된 빈 줄을 하나로 줄이기
+    const normalizedText = quizText.replace(/\n{3,}/g, '\n\n');
+    const lines = normalizedText.split('\n').map(line => line.trim());
+    const quizItems = [];
+    
+    let currentQuiz = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // 숫자로 시작하는 줄이고 "문제" 단어가 포함된 경우 = 새로운 문제
+      if (line.match(/^\d+\./) && (line.includes('문제') || line.includes('**문제**'))) {
+        // 새 퀴즈 항목 시작
+        if (currentQuiz) {
+          quizItems.push(currentQuiz);
+        }
+        
+        currentQuiz = {
+          id: quizItems.length,
+          question: line,
+          answer: null
+        };
+      } 
+      // 정답 줄 찾기
+      else if (line.includes('정답') && currentQuiz && !currentQuiz.answer) {
+        currentQuiz.answer = line;
+      }
+    }
+    
+    // 마지막 퀴즈 추가
+    if (currentQuiz) {
+      quizItems.push(currentQuiz);
+    }
+    
+    return quizItems;
+  };
+
+  const quizItems = parseQuizItems();
+  
+  // 파싱된 결과가 없으면 원본 표시
+  if (quizItems.length === 0) {
+    return <ReactMarkdown>{quizText}</ReactMarkdown>;
+  }
+
+  return (
+    <div className="quiz-container">
+      {quizItems.map((quiz) => (
+        <div key={quiz.id} className="quiz-item mb-4">
+          {/* 문제 표시 */}
+          <p className="quiz-question-text">
+            <span className="question-number">{quiz.question.match(/^\d+\./) ? quiz.question.match(/^\d+\./)[0] : ''}</span>{' '}
+            <span className="question-content">
+              {quiz.question.replace(/^\d+\.\s+(\*\*)?문제(\*\*)?:?(\s+)?/, '').trim()}
+            </span>
+          </p>
+          
+          {/* 정답 표시 - 토글 방식 */}
+          {!visibleAnswers[quiz.id] ? (
+            <div className="quiz-answer-section mt-3">
+              <Button
+                variant="outline-primary"
+                onClick={() => toggleAnswer(quiz.id)}
+                className="show-answer-btn"
+              >
+                <FaEye className="me-2" /> 정답 보기
+              </Button>
+            </div>
+          ) : (
+            <div className="quiz-answer p-3 rounded mt-3">
+              <div className="answer-content">
+                <strong className="answer-label">정답:</strong> 
+                <span className="answer-text">{quiz.answer.replace(/.*정답.*:\s*/, '').trim()}</span>
+              </div>
+              <Button
+                variant="outline-secondary"
+                onClick={() => toggleAnswer(quiz.id)}
+                className="hide-answer-btn mt-2"
+              >
+                <FaEyeSlash className="me-2" /> 정답 숨기기
+              </Button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Quiz 컴포넌트 정의
+const Quiz = ({ quizText }) => {
+  const [quizItems, setQuizItems] = useState([]);
+  const [visibleAnswers, setVisibleAnswers] = useState({});
+
+  useEffect(() => {
+    if (!quizText) return;
+
+    const parseQuizText = (text) => {
+      const lines = text.split('\n').filter(line => line.trim());
+      const parsedQuizzes = [];
+      
+      // 질문과 답변 쌍을 찾기
+      for (let i = 0; i < lines.length; i++) {
+        const questionLine = lines[i];
+        const answerLine = i + 1 < lines.length ? lines[i + 1] : null;
+        
+        // 질문 라인인지 확인 (예: "1. **문제:** 질문내용")
+        if (questionLine.match(/^\d+\.\s+\*\*문제:/)) {
+          // 다음 라인이 답변인지 확인
+          if (answerLine && answerLine.includes('**정답:**')) {
+            const number = questionLine.match(/^\d+\./)[0];
+            const question = questionLine.replace(/^\d+\.\s+\*\*문제:\*\*\s*/, '');
+            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, '');
+            
+            parsedQuizzes.push({
+              id: parsedQuizzes.length,
+              number: number,
+              question: question,
+              answer: answer
+            });
+            
+            // 답변 라인을 건너뜀
+            i++;
+          }
+        }
+      }
+      
+      return parsedQuizzes;
+    };
+    
+    const parsedQuizzes = parseQuizText(quizText);
+    console.log("파싱된 퀴즈:", parsedQuizzes); // 디버깅용
+    setQuizItems(parsedQuizzes);
+  }, [quizText]);
+
+  const toggleAnswer = (quizId) => {
+    setVisibleAnswers(prev => ({
+      ...prev,
+      [quizId]: !prev[quizId]
+    }));
+  };
+
+  if (quizItems.length === 0) {
+    return (
+      <div className="no-quizzes">
+        <p>퀴즈를 파싱할 수 없습니다. 원본 마크다운으로 표시합니다:</p>
+        <ReactMarkdown>{quizText}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quizzes-container">
+      {quizItems.map((quiz) => (
+        <div key={`quiz-${quiz.id}`} className="quiz-item">
+          <div className="quiz-question">
+            <span className="quiz-number">{quiz.number}</span>
+            <span className="quiz-text">{quiz.question}</span>
+          </div>
+          
+          <div className="quiz-answer-section">
+            {!visibleAnswers[quiz.id] ? (
+              <Button 
+                variant="outline-primary" 
+                size="sm" 
+                onClick={() => toggleAnswer(quiz.id)}
+                className="show-answer-btn"
+              >
+                정답 보기
+              </Button>
+            ) : (
+              <div className="quiz-answer">
+                <div className="answer-label">정답:</div>
+                <div className="answer-text">{quiz.answer}</div>
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm" 
+                  onClick={() => toggleAnswer(quiz.id)}
+                  className="hide-answer-btn mt-2"
+                >
+                  정답 숨기기
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const SimpleQuiz = ({ quizText }) => {
+  const [quizItems, setQuizItems] = useState([]);
+  const [visibleAnswers, setVisibleAnswers] = useState({});
+
+  useEffect(() => {
+    if (!quizText) return;
+
+    const parseQuizText = (text) => {
+      const lines = text.split('\n').filter(line => line.trim());
+      const parsedQuizzes = [];
+      
+      // 질문과 답변 쌍을 찾기
+      for (let i = 0; i < lines.length; i++) {
+        const questionLine = lines[i];
+        const answerLine = i + 1 < lines.length ? lines[i + 1] : null;
+        
+        // 질문 라인인지 확인 (예: "1. **문제:** 질문내용")
+        if (questionLine.match(/^\d+\.\s+\*\*문제:/)) {
+          // 다음 라인이 답변인지 확인
+          if (answerLine && answerLine.includes('**정답:**')) {
+            const number = questionLine.match(/^\d+\./)[0];
+            const question = questionLine.replace(/^\d+\.\s+\*\*문제:\*\*\s*/, '');
+            const answer = answerLine.replace(/^.*\*\*정답:\*\*\s*/, '');
+            
+            parsedQuizzes.push({
+              id: parsedQuizzes.length,
+              number: number,
+              question: question,
+              answer: answer
+            });
+            
+            // 답변 라인을 건너뜀
+            i++;
+          }
+        }
+      }
+      
+      return parsedQuizzes;
+    };
+    
+    const parsedQuizzes = parseQuizText(quizText);
+    console.log("파싱된 퀴즈:", parsedQuizzes); // 디버깅용
+    setQuizItems(parsedQuizzes);
+  }, [quizText]);
+
+  const toggleAnswer = (quizId) => {
+    setVisibleAnswers(prev => ({
+      ...prev,
+      [quizId]: !prev[quizId]
+    }));
+  };
+
+  if (quizItems.length === 0) {
+    return (
+      <div className="no-quizzes">
+        <p>퀴즈를 파싱할 수 없습니다. 원본 마크다운으로 표시합니다:</p>
+        <ReactMarkdown>{quizText}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quizzes-container">
+      {quizItems.map((quiz) => (
+        <div key={`quiz-${quiz.id}`} className="quiz-item">
+          <div className="quiz-question">
+            <span className="quiz-number">{quiz.number}</span>
+            <span className="quiz-text">{quiz.question}</span>
+          </div>
+          
+          <div className="quiz-answer-section">
+            {!visibleAnswers[quiz.id] ? (
+              <Button 
+                variant="outline-primary" 
+                size="sm" 
+                onClick={() => toggleAnswer(quiz.id)}
+                className="show-answer-btn"
+              >
+                정답 보기
+              </Button>
+            ) : (
+              <div className="quiz-answer">
+                <div className="answer-label">정답:</div>
+                <div className="answer-text">{quiz.answer}</div>
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm" 
+                  onClick={() => toggleAnswer(quiz.id)}
+                  className="hide-answer-btn mt-2"
+                >
+                  정답 숨기기
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const LectureDetailPage = () => {
   const { lectureId } = useParams();
@@ -303,8 +611,14 @@ const LectureDetailPage = () => {
               <Tab.Content className="tab-content-fixed-height">
                 <Tab.Pane eventKey="summary" active={activeTab === "summary"}>
                   <h4>강의 요약</h4>
-                  <div className="lecture-tab-content">
-                    {lecture.summary || "요약 정보가 없습니다."}
+                  <div className="lecture-tab-content summary-content">
+                    {lecture.summary ? (
+                      <div className="formatted-content">
+                        <ReactMarkdown>{lecture.summary}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="no-content">요약 정보가 없습니다.</div>
+                    )}
                   </div>
                   <div className="download-btn-group mt-3">
                     <Button
@@ -327,8 +641,14 @@ const LectureDetailPage = () => {
                 </Tab.Pane>
                 <Tab.Pane eventKey="transcript" active={activeTab === "transcript"}>
                   <h4>전체 스크립트</h4>
-                  <div className="lecture-tab-content">
-                    {lecture.transcript || "스크립트 정보가 없습니다."}
+                  <div className="lecture-tab-content transcript-content">
+                    {lecture.transcript ? (
+                      <div className="formatted-content transcript">
+                        <ReactMarkdown>{lecture.transcript}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="no-content">스크립트 정보가 없습니다.</div>
+                    )}
                   </div>
                   <div className="download-btn-group mt-3">
                     <Button
@@ -351,8 +671,14 @@ const LectureDetailPage = () => {
                 </Tab.Pane>
                 <Tab.Pane eventKey="questions" active={activeTab === "questions"}>
                   <h4>예상 질문</h4>
-                  <div className="lecture-tab-content">
-                    {lecture.expectedQuestions || "예상 질문 정보가 없습니다."}
+                  <div className="lecture-tab-content questions-content">
+                    {lecture.expectedQuestions ? (
+                      <div className="formatted-content questions">
+                        <QuizParser quizText={lecture.expectedQuestions} />
+                      </div>
+                    ) : (
+                      <div className="no-content">예상 질문 정보가 없습니다.</div>
+                    )}
                   </div>
                   <div className="download-btn-group mt-3">
                     <Button
@@ -385,8 +711,14 @@ const LectureDetailPage = () => {
                   <h4>학습 계획</h4>
                   {isGodMode ? (
                     <>
-                      <div className="lecture-tab-content">
-                        {lecture.studyPlan || "학습 계획 정보가 없습니다."}
+                      <div className="lecture-tab-content studyplan-content">
+                        {lecture.studyPlan ? (
+                          <div className="formatted-content studyplan">
+                            <ReactMarkdown>{lecture.studyPlan}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <div className="no-content">학습 계획 정보가 없습니다.</div>
+                        )}
                       </div>
                       <div className="download-btn-group mt-3">
                         <Button
