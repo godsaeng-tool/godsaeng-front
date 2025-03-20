@@ -111,8 +111,8 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
         style={{ 
           flexGrow: 1, 
           overflowY: 'auto', 
-          maxHeight: '400px',
-          minHeight: '400px'
+          maxHeight: '444px',
+          minHeight: '444px'
         }}
       >
         {initialLoading ? (
