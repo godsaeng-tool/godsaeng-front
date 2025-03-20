@@ -403,13 +403,7 @@ const LectureDetailPage = () => {
                         </Button>
                         <Button
                           className="pdf-download-btn"
-                          onClick={() =>
-                            handleDownload(
-                              "studyplan",
-                              lecture.studyPlan,
-                              "pdf"
-                            )
-                          }
+                          onClick={() =>handleDownload("studyplan", lecture.studyPlan,"pdf")}
                         >
                           학습계획 PDF 다운로드
                         </Button>

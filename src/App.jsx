@@ -21,8 +21,7 @@ function AppContent() {
     userEmail, setUserEmail,
     userName, setUserName,
     recentSummaries, setRecentSummaries,
-    handleLogout,
-    handleLoginSuccess,
+    handleLogout, handleLoginSuccess,
     isSidebarCollapsed,
   } = useAppState();
 
@@ -49,21 +48,17 @@ function AppContent() {
     <Router>
       <div className="app-container">
         <Sidebar
-          recentSummaries={recentSummaries}
-          setRecentSummaries={setRecentSummaries}
+          recentSummaries={recentSummaries} setRecentSummaries={setRecentSummaries}
           onOpenAuthPopup={() => setShowAuthPopup(true)}
           onHomeClick={() => (window.location.href = "/")}
           isAuthenticated={isAuthenticated}
-          userEmail={userEmail}
-          userName={userName}
+          userEmail={userEmail} userName={userName}
           onLogout={handleLogout}
         />
 
         <div className={`main-header ${isSidebarCollapsed ? 'collapsed' : ''}`}>
           <img
-            src="/fire_icon.png"
-            alt="fire"
-            className="logo-img"
+            src="/fire_icon.png" alt="fire" className="logo-img"
             onClick={() => (window.location.href = "/")}
             style={{ cursor: "pointer" }}
           />
@@ -72,7 +67,7 @@ function AppContent() {
             onClick={() => (window.location.href = "/")}
             style={{ cursor: "pointer" }}
           >
-            갓생학습
+            갓생도구
           </div>
         </div>
 
@@ -88,22 +83,16 @@ function AppContent() {
                 />
               }
             />
-            {/* <Route
-              path="/summary"
-              element={<SummaryPage recentSummaries={recentSummaries} />}
-            /> */}
-
+            {/* <Route path="/summary" element={<SummaryPage recentSummaries={recentSummaries} />} /> */}
             <Route
               path="/lectures/:lectureId"
-              element={<LectureDetailPage recentSummaries={recentSummaries} />
-              }
+              element={<LectureDetailPage recentSummaries={recentSummaries} />}
             />
           </Routes>
 
           {showAuthPopup && (
             <AuthPopup
-              onLoginClick={handleLoginClick}
-              onSignupClick={handleSignupClick}
+              onLoginClick={handleLoginClick} onSignupClick={handleSignupClick}
               onClose={() => setShowAuthPopup(false)}
             />
           )}

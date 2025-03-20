@@ -330,7 +330,7 @@ function Sidebar({
           )}
 
           <div className="sidebar-footer">
-            <p>© 갓생살기</p>
+            <p>© 갓생도구</p>
           </div>
         </div>
       )}
