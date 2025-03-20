@@ -88,20 +88,54 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
       const response = await sendQuestion(lectureId, currentQuestion);
       
       // AI 응답 추가
-      const aiMessage = {
-        id: response.answerId,
-        content: response.answer,
-        isUser: false,
-        timestamp: response.timestamp || new Date().toISOString()
-      };
+      // const aiMessage = {
+      //   id: response.answerId,
+      //   content: response.answer,
+      //   isUser: false,
+      //   timestamp: response.timestamp || new Date().toISOString()
+      // };
       
-      setMessages(prev => [...prev, aiMessage]);
+      // setMessages(prev => [...prev, aiMessage]);
+      streamAIResponse(response.answer, response.answerId);
     } catch (err) {
       console.error('질문 전송 실패:', err);
       setError('질문을 처리하는데 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const streamAIResponse = (fullText, answerId) => {
+    let index = 0;
+    const typingSpeed = 30; // ms (속도 조절 가능!)
+  
+    const newMessage = {
+      id: answerId || `a-${Date.now()}`,
+      content: '',
+      isUser: false,
+      timestamp: new Date().toISOString()
+    };
+  
+    setMessages(prev => [...prev, newMessage]);
+  
+    const interval = setInterval(() => {
+      if (index < fullText.length) {
+        setMessages(prevMessages => {
+          const updatedMessages = [...prevMessages];
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+  
+          updatedMessages[updatedMessages.length - 1] = {
+            ...lastMessage,
+            content: fullText.slice(0, index + 1)
+          };
+  
+          return updatedMessages;
+        });
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, typingSpeed);
   };
 
   return (
