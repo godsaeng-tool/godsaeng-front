@@ -426,10 +426,10 @@ const LectureDetailPage = () => {
 
         <Col md={4}>
           <Card className="mb-4 chat-card">
-            <Card.Header className="chat-card-header">
+            <Card.Header>
               <h5 className="mb-0">AI 학습 도우미</h5>
             </Card.Header>
-            <Card.Body className="chat-card-body p-0">
+            <Card.Body className="p-0">
               <ChatInterface lectureId={lectureId} hideHeader={true} />
             </Card.Body>
           </Card>

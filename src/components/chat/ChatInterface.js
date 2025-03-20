@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { sendQuestion, getChatHistory } from '../../api/chatApi';
 import ChatMessage from './ChatMessage';
 
-const ChatInterface = ({ lectureId }) => {
+const ChatInterface = ({ lectureId, hideHeader = false }) => {
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,68 +105,82 @@ const ChatInterface = ({ lectureId }) => {
   };
 
   return (
-    <Card className="h-100">
-      <Card.Header>
-        <h5 className="mb-0">AI 학습 도우미</h5>
-      </Card.Header>
-      <Card.Body className="d-flex flex-column p-0">
-        <div 
-          className="chat-messages p-3" 
-          style={{ 
-            flexGrow: 1, 
-            overflowY: 'auto', 
-            maxHeight: '400px',
-            minHeight: '400px'
-          }}
-        >
-          {initialLoading ? (
-            <div className="text-center my-3">
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              채팅 기록을 불러오는 중...
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="text-center text-muted my-3">
-              강의 내용에 대해 질문해보세요!
-            </div>
-          ) : (
-            messages.map(message => (
-              <ChatMessage 
-                key={message.id} 
-                message={message} 
-              />
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        
-        {error && (
-          <Alert variant="danger" className="m-2 mb-0 py-2">
-            {error}
-          </Alert>
-        )}
-        
-        <Form onSubmit={handleSubmit} className="p-2 border-top mt-auto">
-          <div className="d-flex">
-            <Form.Control
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="질문을 입력하세요..."
-              disabled={loading}
-            />
-            <Button type="submit" className="ms-2"disabled={loading || !question.trim()}
-            style={{ backgroundColor: "#FFC330", borderColor: "#FFC330", color: "black", height: "50px", width: "70px", display: "flex", alignItems: "center",  justifyContent: "center", fontSize: "17px"}}>
-              {loading ? (<span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>) : ("전송")}
-            </Button>
+    <div className="d-flex flex-column h-100">
+      <div 
+        className="chat-messages p-3" 
+        style={{ 
+          flexGrow: 1, 
+          overflowY: 'auto', 
+          maxHeight: '400px',
+          minHeight: '400px'
+        }}
+      >
+        {initialLoading ? (
+          <div className="text-center my-3">
+            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            채팅 기록을 불러오는 중...
           </div>
-        </Form>
-      </Card.Body>
-    </Card>
+        ) : messages.length === 0 ? (
+          <div className="text-center text-muted my-3">
+            강의 내용에 대해 질문해보세요!
+          </div>
+        ) : (
+          messages.map(message => (
+            <ChatMessage 
+              key={message.id} 
+              message={message} 
+            />
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      {error && (
+        <Alert variant="danger" className="m-2 mb-0 py-2">
+          {error}
+        </Alert>
+      )}
+      
+      <Form onSubmit={handleSubmit} className="p-2 border-top mt-auto">
+        <div className="d-flex">
+          <Form.Control
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="질문을 입력하세요..."
+            disabled={loading}
+          />
+          <Button 
+            type="submit" 
+            className="ms-2"
+            disabled={loading || !question.trim()}
+            style={{ 
+              backgroundColor: "#FFC330", 
+              borderColor: "#FFC330", 
+              color: "black", 
+              height: "50px", 
+              width: "70px", 
+              display: "flex", 
+              alignItems: "center",  
+              justifyContent: "center", 
+              fontSize: "17px"
+            }}
+          >
+            {loading ? (
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ) : (
+              "전송"
+            )}
+          </Button>
+        </div>
+      </Form>
+    </div>
   );
 };
 
 ChatInterface.propTypes = {
-  lectureId: PropTypes.string.isRequired
+  lectureId: PropTypes.string.isRequired,
+  hideHeader: PropTypes.bool
 };
 
 export default ChatInterface; 
