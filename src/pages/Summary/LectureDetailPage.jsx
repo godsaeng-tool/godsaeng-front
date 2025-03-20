@@ -11,6 +11,7 @@ import {
   Alert,
   Button,
   Spinner,
+  Modal,
 } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getLectureDetail, deleteLecture } from "../../api/lectureApi";
@@ -201,6 +202,32 @@ const LectureDetailPage = () => {
       ? getYoutubeEmbedUrl(lecture.videoUrl)
       : null;
 
+  // 갓생모드 구독 안내 컴포넌트
+  const GodModePrompt = () => (
+    <div className="god-mode-prompt">
+      <div className="text-center my-4 py-4">
+        <FaCrown
+          className="crown-icon mb-3"
+          style={{ fontSize: "3rem", color: "#FFC330" }}
+        />
+        <h4>갓생모드 전용 기능입니다</h4>
+        <p className="mb-4">
+          학습 계획 기능은 갓생모드 구독자만 이용할 수 있습니다. 더 효율적인
+          학습을 위해 갓생모드를 구독해보세요!
+        </p>
+        <Button
+          variant="warning"
+          className="god-mode-subscribe-btn"
+          onClick={handleSubscribeGodMode}
+          disabled={subscribing}
+        >
+          <FaCrown className="me-2" />
+          {subscribing ? "구독 처리 중..." : "갓생모드 구독하기"}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <Container
       className={`my-4 lecture-detail-container ${
@@ -246,7 +273,15 @@ const LectureDetailPage = () => {
                   <Nav.Link eventKey="questions">예상 질문</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="studyplan">학습 계획</Nav.Link>
+                  <Nav.Link eventKey="studyplan">
+                    학습 계획
+                    {!isGodMode && (
+                      <FaCrown
+                        className="ms-1"
+                        style={{ fontSize: "0.8rem", color: "#FFC330" }}
+                      />
+                    )}
+                  </Nav.Link>
                 </Nav.Item>
               </Nav>
             </Card.Header>
@@ -341,33 +376,46 @@ const LectureDetailPage = () => {
                     </Button>
                   </div>
                 </Tab.Pane>
-
                 <Tab.Pane
                   eventKey="studyplan"
                   active={activeTab === "studyplan"}
                 >
                   <h4>학습 계획</h4>
-                  <div className="lecture-tab-content">
-                    {lecture.studyPlan || "학습 계획 정보가 없습니다."}
-                  </div>
-                  <div className="download-btn-group mt-3">
-                    <Button
-                      className="txt-download-btn me-2"
-                      onClick={() =>
-                        handleDownload("studyplan", lecture.studyPlan, "txt")
-                      }
-                    >
-                      학습계획 TXT 다운로드
-                    </Button>
-                    <Button
-                      className="pdf-download-btn"
-                      onClick={() =>
-                        handleDownload("studyplan", lecture.studyPlan, "pdf")
-                      }
-                    >
-                      학습계획 PDF 다운로드
-                    </Button>
-                  </div>
+                  {isGodMode ? (
+                    <>
+                      <div className="lecture-tab-content">
+                        {lecture.studyPlan || "학습 계획 정보가 없습니다."}
+                      </div>
+                      <div className="download-btn-group mt-3">
+                        <Button
+                          className="txt-download-btn me-2"
+                          onClick={() =>
+                            handleDownload(
+                              "studyplan",
+                              lecture.studyPlan,
+                              "txt"
+                            )
+                          }
+                        >
+                          학습계획 TXT 다운로드
+                        </Button>
+                        <Button
+                          className="pdf-download-btn"
+                          onClick={() =>
+                            handleDownload(
+                              "studyplan",
+                              lecture.studyPlan,
+                              "pdf"
+                            )
+                          }
+                        >
+                          학습계획 PDF 다운로드
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <GodModePrompt />
+                  )}
                 </Tab.Pane>
               </Tab.Content>
             </Card.Body>
