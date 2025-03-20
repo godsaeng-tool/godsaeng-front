@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert, Dropdown } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { sendQuestion, getChatHistory } from '../../api/chatApi';
 import ChatMessage from './ChatMessage';
@@ -10,7 +10,15 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [initialLoading, setInitialLoading] = useState(true);
+  const [selectedTone, setSelectedTone] = useState('b'); // 기본 말투를 'b'로 변경
   const messagesEndRef = useRef(null);
+
+  // 말투 옵션
+  const toneOptions = [
+    { value: 'b', label: '츤데레' },
+    { value: 'a', label: '플러팅' },
+    { value: 'c', label: '신' }
+  ];
 
   // 채팅 기록 로드
   useEffect(() => {
@@ -85,17 +93,10 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
     setQuestion('');
     
     try {
-      const response = await sendQuestion(lectureId, currentQuestion);
+      // 선택된 말투를 요청에 포함
+      const response = await sendQuestion(lectureId, currentQuestion, selectedTone);
       
       // AI 응답 추가
-      // const aiMessage = {
-      //   id: response.answerId,
-      //   content: response.answer,
-      //   isUser: false,
-      //   timestamp: response.timestamp || new Date().toISOString()
-      // };
-      
-      // setMessages(prev => [...prev, aiMessage]);
       streamAIResponse(response.answer, response.answerId);
     } catch (err) {
       console.error('질문 전송 실패:', err);
@@ -138,6 +139,11 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
     }, typingSpeed);
   };
 
+  // 말투 변경 핸들러
+  const handleToneChange = (e) => {
+    setSelectedTone(e.target.value);
+  };
+
   return (
     <div className="d-flex flex-column h-100">
       <div 
@@ -176,36 +182,59 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
       )}
       
       <Form onSubmit={handleSubmit} className="p-2 border-top mt-auto">
-        <div className="d-flex">
-          <Form.Control
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="질문을 입력하세요..."
-            disabled={loading}
-          />
-          <Button 
-            type="submit" 
-            className="ms-2"
-            disabled={loading || !question.trim()}
-            style={{ 
-              backgroundColor: "#FFC330", 
-              borderColor: "#FFC330", 
-              color: "black", 
-              height: "50px", 
-              width: "70px", 
-              display: "flex", 
-              alignItems: "center",  
-              justifyContent: "center", 
-              fontSize: "17px"
-            }}
-          >
-            {loading ? (
-              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            ) : (
-              "전송"
-            )}
-          </Button>
+        <div className="d-flex flex-column">
+          {/* 말투 선택 콤보박스 */}
+          <div className="mb-2">
+            <Form.Select 
+              value={selectedTone}
+              onChange={handleToneChange}
+              style={{ 
+                width: '150px', 
+                fontSize: '0.9rem',
+                borderColor: '#FFC330',
+                backgroundColor: '#FFF8E7'
+              }}
+            >
+              {toneOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Form.Select>
+          </div>
+          
+          {/* 질문 입력 및 전송 버튼 */}
+          <div className="d-flex">
+            <Form.Control
+              type="text"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="질문을 입력하세요..."
+              disabled={loading}
+            />
+            <Button 
+              type="submit" 
+              className="ms-2"
+              disabled={loading || !question.trim()}
+              style={{ 
+                backgroundColor: "#FFC330", 
+                borderColor: "#FFC330", 
+                color: "black", 
+                height: "50px", 
+                width: "70px", 
+                display: "flex", 
+                alignItems: "center",  
+                justifyContent: "center", 
+                fontSize: "17px"
+              }}
+            >
+              {loading ? (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              ) : (
+                "전송"
+              )}
+            </Button>
+          </div>
         </div>
       </Form>
     </div>

@@ -1,6 +1,6 @@
 import api from './index';
 
-export const sendQuestion = async (lectureId, question, tone = 'normal') => {
+export const sendQuestion = async (lectureId, question, tone = 'b') => {
   const response = await api.post(`/chat/lectures/${lectureId}/questions`, {
     question,
     tone
