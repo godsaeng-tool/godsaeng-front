@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Container, Row, Col, Card, Nav, Tab, Alert, Button, Spinner,
+  Container, Row, Col, Card, Nav, Tab, Alert, Button, Spinner, Modal,
 } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getLectureDetail } from "../../api/lectureApi";
+import { getLectureDetail, deleteLecture } from "../../api/lectureApi";
+import { FaCrown } from "react-icons/fa";
 import { useAppState } from "../../context/AppStateProvider";
 import Loading from "../../components/common/Loading";
 import ChatInterface from "../../components/chat/ChatInterface";
@@ -16,10 +17,13 @@ const LectureDetailPage = () => {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("summary");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
-  // 사이드바 상태 가져오기
-  const { isSidebarCollapsed } = useAppState();
+  // 사이드바 상태와 갓생모드 관련 상태/함수 가져오기
+  const { isSidebarCollapsed, isGodMode, toggleGodMode } = useAppState();
+  const [subscribing, setSubscribing] = useState(false);
 
   const fetchLectureDetail = useCallback(async () => {
     try {
@@ -46,6 +50,20 @@ const LectureDetailPage = () => {
     }
     return () => clearInterval(pollingInterval);
   }, [isProcessing, fetchLectureDetail]);
+
+  // 갓생모드 구독 처리 함수
+  const handleSubscribeGodMode = async () => {
+    setSubscribing(true);
+    try {
+      await toggleGodMode();
+      // 구독 성공 후 페이지 새로고침하여 상태 갱신
+      window.location.reload();
+    } catch (error) {
+      console.error("갓생모드 구독 실패:", error);
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   if (loading && !lecture)
     return <Loading message="강의 정보를 불러오는 중..." />;
@@ -113,6 +131,29 @@ const LectureDetailPage = () => {
     ? getYoutubeEmbedUrl(lecture.videoUrl)
     : null;
 
+    // 갓생모드 구독 안내 컴포넌트
+    const GodModePrompt = () => (
+      <div className="god-mode-prompt">
+        <div className="text-center my-4 py-4">
+          <FaCrown className="crown-icon mb-3" style={{ fontSize: '3rem', color: '#FFC330' }} />
+          <h4>갓생모드 전용 기능입니다</h4>
+          <p className="mb-4">
+            학습 계획 기능은 갓생모드 구독자만 이용할 수 있습니다.
+            더 효율적인 학습을 위해 갓생모드를 구독해보세요!
+          </p>
+          <Button 
+            variant="warning" 
+            className="god-mode-subscribe-btn"
+            onClick={handleSubscribeGodMode}
+            disabled={subscribing}
+          >
+            <FaCrown className="me-2" /> 
+            {subscribing ? '구독 처리 중...' : '갓생모드 구독하기'}
+          </Button>
+        </div>
+      </div>
+    );
+
     return (
       <Container className={`my-4 lecture-detail-container ${isSidebarCollapsed ? "collapsed" : ""}`}>
         <Row className="mb-4">
@@ -140,7 +181,12 @@ const LectureDetailPage = () => {
                   <Nav.Item><Nav.Link eventKey="summary">요약</Nav.Link></Nav.Item>
                   <Nav.Item><Nav.Link eventKey="transcript">전체 스크립트</Nav.Link></Nav.Item>
                   <Nav.Item><Nav.Link eventKey="questions">예상 질문</Nav.Link></Nav.Item>
-                  <Nav.Item><Nav.Link eventKey="studyplan">학습 계획</Nav.Link></Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="studyplan">
+                      학습 계획
+                      {!isGodMode && <FaCrown className="ms-1" style={{ fontSize: '0.8rem', color: '#FFC330' }} />}
+                    </Nav.Link>
+                  </Nav.Item>
                 </Nav>
               </Card.Header>
               <Card.Body className="lecture-card-body">
@@ -165,9 +211,13 @@ const LectureDetailPage = () => {
                   </Tab.Pane>
                   <Tab.Pane eventKey="studyplan" active={activeTab === "studyplan"}>
                     <h4>학습 계획</h4>
-                    <div className="lecture-tab-content">
-                      {lecture.studyPlan || "학습 계획 정보가 없습니다."}
-                    </div>
+                    {isGodMode ? (
+                      <div className="lecture-tab-content">
+                        {lecture.studyPlan || "학습 계획 정보가 없습니다."}
+                      </div>
+                    ) : (
+                      <GodModePrompt />
+                    )}
                   </Tab.Pane>
                 </Tab.Content>
               </Card.Body>

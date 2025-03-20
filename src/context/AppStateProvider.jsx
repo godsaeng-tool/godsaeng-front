@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { removeTokens } from "../utils/tokenUtils";
+import { removeTokens, getToken } from "../utils/tokenUtils";
 import { getUserRecentLectures, updateLectureTitle, getLectures } from "../api/lectureApi";
+import { updateGodMode, getCurrentUser } from "../api/authApi";
 
 const AppStateContext = createContext();
 
@@ -21,11 +22,23 @@ export const AppStateProvider = ({ children }) => {
   const [editIndex, setEditIndex] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // 갓생모드 상태 추가 - 로컬 스토리지에서 초기값 가져오기
+  const [isGodMode, setIsGodMode] = useState(() => {
+    const savedGodMode = localStorage.getItem("isGodMode");
+    return savedGodMode === "true";
+  });
+
+  // 갓생모드 상태가 변경될 때 로컬 스토리지에 저장
+  useEffect(() => {
+    localStorage.setItem("isGodMode", isGodMode);
+  }, [isGodMode]);
+
   useEffect(() => {
     const storedEmail = localStorage.getItem("userEmail");
     const storedName = localStorage.getItem("userName");
+    const token = getToken();
 
-    if (storedEmail && storedName) {
+    if (storedEmail && storedName && token) {
       setIsAuthenticated(true);
       setUserEmail(storedEmail);
       setUserName(storedName);
@@ -42,21 +55,68 @@ export const AppStateProvider = ({ children }) => {
         }
       };
       
+      // 사용자 정보 가져오기 (갓생모드 상태 포함)
+      const fetchUserInfo = async () => {
+        try {
+          const userInfo = await getCurrentUser();
+          setIsGodMode(userInfo.godMode || false);
+          // 서버에서 가져온 갓생모드 상태를 로컬 스토리지에 저장
+          localStorage.setItem("isGodMode", userInfo.godMode || false);
+        } catch (error) {
+          console.error("사용자 정보 로딩 실패:", error);
+        }
+      };
+      
       fetchRecentLectures();
+      fetchUserInfo();
     }
   }, []);
 
+  // 갓생모드 토글 함수
+  const toggleGodMode = async () => {
+    if (!isAuthenticated) {
+      setShowAuthPopup(true);
+      return;
+    }
+    
+    console.log('현재 갓생모드 상태:', isGodMode);
+    
+    try {
+      const newGodModeStatus = !isGodMode;
+      console.log('변경할 갓생모드 상태:', newGodModeStatus);
+      
+      const response = await updateGodMode(newGodModeStatus);
+      console.log('갓생모드 업데이트 응답:', response);
+      
+      setIsGodMode(newGodModeStatus);
+      localStorage.setItem("isGodMode", newGodModeStatus);
+      
+      console.log('변경 후 갓생모드 상태:', newGodModeStatus);
+      
+      if (newGodModeStatus) {
+        alert('갓생모드가 활성화되었습니다! 더 많은 기능을 이용해보세요.');
+      } else {
+        alert('갓생모드가 비활성화되었습니다.');
+      }
+    } catch (error) {
+      console.error('갓생모드 변경 실패:', error);
+      alert('갓생모드 변경에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   // 로그인 성공 시 호출하는 함수
-  const handleLoginSuccess = async (email, name) => {
+  const handleLoginSuccess = async (email, name, godMode = false) => {
     setIsAuthenticated(true);
     setUserEmail(email);
     setUserName(name);
+    setIsGodMode(godMode);
     setShowLogin(false);
     setShowSignup(false);
     setShowAuthPopup(false);
     
     localStorage.setItem("userEmail", email);
     localStorage.setItem("userName", name);
+    localStorage.setItem("isGodMode", godMode);
     
     // 최근 강의 목록 가져오기
     try {
@@ -78,10 +138,12 @@ export const AppStateProvider = ({ children }) => {
     setUserEmail("");
     setUserName("");
     setRecentSummaries([]);
+    setIsGodMode(false);
     
     // 로컬 스토리지 정리
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userName");
+    localStorage.removeItem("isGodMode");
     localStorage.removeItem(`recentSummaries_${userEmail}`);
 
     // 홈으로 리다이렉트
@@ -132,6 +194,7 @@ export const AppStateProvider = ({ children }) => {
         editTitle,setEditTitle,
         editIndex,setEditIndex,
         showEditModal,setShowEditModal,
+        isGodMode, setIsGodMode, toggleGodMode,
         handleLoginSuccess,
         handleLogout,
         isSidebarCollapsed,toggleSidebar,

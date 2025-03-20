@@ -40,12 +40,15 @@ function LoginModal({
       setToken(result.accessToken);
       setRefreshToken(result.refreshToken);
 
+      // 갓생모드 상태 저장
+      localStorage.setItem("isGodMode", result.isGodMode || false);
+
       // 사용자 정보 저장
       setIsAuthenticated(true);
       setUserEmail(result.email);
       setUserName(result.username);
 
-      onLoginSuccess(result.email, result.username);
+      onLoginSuccess(result.email, result.username, result.isGodMode);
       onClose();
     } catch (error) {
       console.error("로그인 요청 중 오류 발생:", error);

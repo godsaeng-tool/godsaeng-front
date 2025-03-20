@@ -14,7 +14,6 @@ import { FaCrown } from "react-icons/fa";
 import { MdOutlineAddToPhotos } from "react-icons/md";
 
 import { useAppState } from "../../context/AppStateProvider";
-import { updateGodMode } from "../../api/authApi";
 import { getUserRecentLectures, deleteLecture } from "../../api/lectureApi";
 import "../../styles/Home/Sidebar.css";
 
@@ -31,7 +30,7 @@ function Sidebar({
   const { showEditModal, setShowEditModal, setRecentSummaries } = useAppState();
   const { isSidebarCollapsed, toggleSidebar, isRecentOpen, toggleRecentSummaries } = useAppState();
 
-  const [isGodMode, setIsGodMode] = useState(false);
+  const { isGodMode, toggleGodMode } = useAppState();
   const [loading, setLoading] = useState(false);
   const [lecturesLoading, setLecturesLoading] = useState(false);
 
@@ -66,26 +65,6 @@ function Sidebar({
       setRecentSummaries([]);
     }
   }, [isAuthenticated]);
-
-  const toggleGodMode = async () => {
-    setLoading(true);
-    try {
-      const newGodModeStatus = !isGodMode;
-      await updateGodMode(newGodModeStatus);
-      setIsGodMode(newGodModeStatus);
-      
-      if (newGodModeStatus) {
-        alert('갓생모드가 활성화되었습니다! 더 많은 기능을 이용해보세요.');
-      } else {
-        alert('갓생모드가 비활성화되었습니다.');
-      }
-    } catch (error) {
-      console.error('갓생모드 변경 실패:', error);
-      alert('갓생모드 변경에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSummaryClick = (lecture, index) => {
     setActiveIndex(index);
@@ -188,6 +167,17 @@ function Sidebar({
   };
 
   const groupedLectures = groupLecturesByDate(localSummaries);
+
+  // 갓생모드 버튼 클릭 핸들러
+  const handleGodModeToggle = async () => {
+    try {
+      await toggleGodMode();
+      // 토글 후 페이지 새로고침
+      window.location.reload();
+    } catch (error) {
+      console.error("갓생모드 변경 실패:", error);
+    }
+  };
 
   return (
     <div className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
@@ -332,7 +322,7 @@ function Sidebar({
                   안녕하세요! {userName}님 ({userEmail})
                 </p> */}
               </div>
-              <button className="god-mode-button" onClick={toggleGodMode}>
+              <button className="god-mode-button" onClick={handleGodModeToggle}>
                 <FaCrown className={`crown-icon ${isGodMode ? 'active' : ''}`} />
                 {loading ? '처리 중...' : isGodMode ? '갓생모드 활성화됨' : '갓생모드 구독'}
               </button>

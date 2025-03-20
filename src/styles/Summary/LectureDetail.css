@@ -1,0 +1,24 @@
+/* 갓생모드 프롬프트 스타일 */
+.god-mode-prompt {
+  background-color: #fff8e1;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.crown-icon {
+  color: #FFC330;
+}
+
+.god-mode-subscribe-btn {
+  background-color: #FFC330;
+  border-color: #FFC330;
+  color: #000;
+  font-weight: 500;
+}
+
+.god-mode-subscribe-btn:hover {
+  background-color: #e6b12e;
+  border-color: #e6b12e;
+  color: #000;
+} 
