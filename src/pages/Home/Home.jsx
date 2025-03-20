@@ -21,6 +21,7 @@ function Home({ setRecentSummaries, onLogout }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [remainingDays, setRemainingDays] = useState(5);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +40,10 @@ function Home({ setRecentSummaries, onLogout }) {
     setUploadProgress(0);
   };
 
+  const handleRemainingDaysChange = (e) => {
+    setRemainingDays(parseInt(e.target.value));
+  };
+
   const handleSummarize = async () => {
     if (!isAuthenticatedContext) return showError("먼저 로그인을 해주세요.");
     if (!urlInput && !selectedFile && !courseTitle) return showError("강의 제목을 입력하세요.\n링크를 입력하시거나, 파일을 업로드해주세요.");
@@ -49,7 +54,13 @@ function Home({ setRecentSummaries, onLogout }) {
 
       if (urlInput) {
         if (!validateYoutubeUrl(urlInput)) return showError("유효한 YouTube URL을 입력해주세요.");
-        const lectureData = { title: courseTitle || "YouTube 강의", description: courseDescription || "", videoUrl: urlInput, sourceType: "YOUTUBE" };
+        const lectureData = { 
+          title: courseTitle || "YouTube 강의", 
+          description: courseDescription || "", 
+          videoUrl: urlInput, 
+          sourceType: "YOUTUBE",
+          remainingDays: remainingDays
+        };
         const { id } = await createYoutubeLecture(lectureData);
         lectureId = id; newSummary = lectureData.title;
 
@@ -58,6 +69,7 @@ function Home({ setRecentSummaries, onLogout }) {
         formData.append("file", selectedFile);
         formData.append("title", courseTitle || selectedFile.name);
         formData.append("description", courseDescription || "");
+        formData.append("remainingDays", remainingDays);
         const { id } = await uploadLecture(formData, {
           onUploadProgress: ({ loaded, total }) => setUploadProgress(Math.round((loaded * 100) / total))
         });
@@ -144,6 +156,23 @@ function Home({ setRecentSummaries, onLogout }) {
             <p className="course-title">강의 제목과 설명을 입력하세요</p>
             <input className="course-title-input" type="text" value={courseTitle} onChange={e => setCourseTitle(e.target.value)} placeholder="강의 제목" />
             <textarea className="course-description-textarea" value={courseDescription} onChange={e => setCourseDescription(e.target.value)} placeholder="강의 설명 (선택사항)" />
+            
+            <div className="remaining-days-container">
+              <label htmlFor="remainingDays">시험까지 남은 기간</label>
+              <select 
+                id="remainingDays"
+                className="remaining-days-select"
+                value={remainingDays}
+                onChange={handleRemainingDaysChange}
+              >
+                <option value="1">1일</option>
+                <option value="2">2일</option>
+                <option value="3">3일</option>
+                <option value="4">4일</option>
+                <option value="5">5일</option>
+              </select>
+            </div>
+            
             <button className="submit-button" onClick={() => setShowCourseInput(false)}>저장</button>
           </div>
         </div>
