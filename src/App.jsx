@@ -23,6 +23,7 @@ function AppContent() {
     recentSummaries, setRecentSummaries,
     handleLogout,
     handleLoginSuccess,
+    isSidebarCollapsed,
   } = useAppState();
 
   useEffect(() => {
@@ -58,7 +59,7 @@ function AppContent() {
           onLogout={handleLogout}
         />
 
-        <div className="main-header">
+        <div className={`main-header ${isSidebarCollapsed ? 'collapsed' : ''}`}>
           <img
             src="/fire_icon.png"
             alt="fire"
@@ -75,7 +76,7 @@ function AppContent() {
           </div>
         </div>
 
-        <div className="main-content">
+        <div className={`main-content ${isSidebarCollapsed ? 'expanded' : ''}`}>
           <Routes>
             <Route
               path="/"

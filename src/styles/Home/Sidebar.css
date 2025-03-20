@@ -55,14 +55,24 @@
   display: flex;
   flex-direction: column;
   height: calc(100% - 80px); /* 헤더와 푸터를 제외한 높이 */
+  overflow: hidden; /* 내용이 넘치지 않도록 설정 */
 }
 
-/* 사이드바 내용 스타일 */
+/* 메뉴 컨테이너 */
+.menu-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 내용이 넘치지 않도록 설정 */
+}
+
+/* 메뉴 항목 컨테이너 */
 .sidebar-content ul {
   list-style: none;
   padding: 0px;
   padding-top: 10px;
-  margin-bottom: 20px; /* 메뉴와 버튼 사이 간격 줄이기 */
+  margin-bottom: 20px;
+  flex-shrink: 0; /* 크기 축소 방지 */
 }
 
 /* 홈 / 최신 / 내 서랍 버튼 스타일 */
@@ -239,12 +249,11 @@
   text-align: center;
 }
 
+/* 사용자 정보 컨테이너 위치 조정 */
 .sidebar-content .user-info-container {
-  position: relative; /* absolute에서 relative로 변경 */
-  bottom: auto; /* 위치 고정 제거 */
-  width: 100%;
   margin-top: auto; /* 상단 여백을 자동으로 설정하여 하단에 붙도록 함 */
-  padding-bottom: 20px; /* 하단 여백 추가 */
+  padding-bottom: 10px; /* 하단 여백 추가 */
+  flex-shrink: 0; /* 크기 축소 방지 */
 }
 
 /* 사이드바 푸터 */
@@ -265,7 +274,7 @@
   color: #888;
 }
 
-/* 갓생모드 버튼 스타일 (로그아웃 버튼 스타일을 기반으로 수정) */
+/* 갓생모드 버튼 스타일 */
 .god-mode-button {
   display: flex;
   align-items: center;
@@ -281,6 +290,7 @@
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.3s;
+  flex-shrink: 0; /* 크기 축소 방지 */
 }
 
 .god-mode-button:hover {
@@ -300,9 +310,10 @@
 /* 최근 강의 목록 스타일 수정 */
 .recent-summaries {
   margin-left: 20px;
-  max-height: 300px; /* 기존 200px에서 300px로 증가 */
   overflow-y: auto;
-  margin-bottom: 10px;
+  flex: 1; /* 남은 공간 모두 차지 */
+  max-height: calc(100vh - 300px); /* 동적 높이 설정 */
+  min-height: 100px; /* 최소 높이 설정 */
 }
 
 /* 요약 목록 아이템 */
@@ -364,4 +375,13 @@
   text-align: center;
   color: #888;
   font-style: italic;
+}
+
+/* 최근 강의 목록 컨테이너 */
+.recent-summaries-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 10px;
 }

@@ -27,16 +27,24 @@
   background-color: white;
 }
 
+/* 강의 생성 컨테이너 */
 .upload-container {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 90vh;
-  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
 }
- 
+
+/* 사이드바가 접혔을 때 강의 생성 컨테이너 조정 */
+.main-content.expanded .upload-container {
+  margin-left: 0;
+}
+
+/* 로고 스타일 (사이드바 접히면 로고 위치 조정) */
+.main-header.collapsed {
+  left: 50px;
+}
+
 /* URL 입력칸 */
 .upload-input {
   flex-grow: 1; /* 입력 칸이 가능한 공간을 모두 차지하도록 설정 */

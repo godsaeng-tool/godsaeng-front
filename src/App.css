@@ -88,11 +88,13 @@
   padding: 20px;
   margin-left: 250px; /* 사이드바 공간 확보 */
   transition: margin-left 0.3s ease;
+  width: calc(100% - 250px); /* 사이드바 너비를 제외한 너비 */
 }
 
-/* 사이드바 접혔을 때 메인화면 확장 */
+/* 사이드바 접혔을 때 메인 컨텐츠 확장 */
 .main-content.expanded {
   margin-left: 0;
+  width: 100%;
 }
 
 /* 강의 제목 및 설명 입력 모달 */

@@ -217,99 +217,101 @@ function Sidebar({
               </li>
 
               {isRecentOpen && (
-                <ul className="recent-summaries">
-                  {lecturesLoading ? (
-                    <li className="loading-message">강의 목록 로딩 중...</li>
-                  ) : localSummaries.length > 0 ? (
-                    <>
-                      {groupedLectures.today.length > 0 && (
-                        <div className="date-group">
-                          <div className="date-header">오늘</div>
-                          {groupedLectures.today.map((lecture, index) => (
-                            <li
-                              key={lecture.id}
-                              className={`summary-list-item ${activeIndex === `today-${index}` ? "active" : ""}`}
-                            >
-                              <div className="summary-item">
-                                <span
-                                  onClick={() => onSummaryClick(lecture, `today-${index}`)}
-                                  className={activeIndex === `today-${index}` ? "active" : ""}
-                                >
-                                  {lecture.title}
-                                </span>
-                                <HiOutlineDotsHorizontal
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMoreOptionsClick(`today-${index}`, e, lecture);
-                                  }}
-                                  className="more-options-icon"
-                                />
-                              </div>
-                            </li>
-                          ))}
-                        </div>
-                      )}
+                <div className="recent-summaries-container">
+                  <ul className="recent-summaries">
+                    {lecturesLoading ? (
+                      <li className="loading-message">강의 목록 로딩 중...</li>
+                    ) : localSummaries.length > 0 ? (
+                      <>
+                        {groupedLectures.today.length > 0 && (
+                          <div className="date-group">
+                            <div className="date-header">오늘</div>
+                            {groupedLectures.today.map((lecture, index) => (
+                              <li
+                                key={lecture.id}
+                                className={`summary-list-item ${activeIndex === `today-${index}` ? "active" : ""}`}
+                              >
+                                <div className="summary-item">
+                                  <span
+                                    onClick={() => onSummaryClick(lecture, `today-${index}`)}
+                                    className={activeIndex === `today-${index}` ? "active" : ""}
+                                  >
+                                    {lecture.title}
+                                  </span>
+                                  <HiOutlineDotsHorizontal
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMoreOptionsClick(`today-${index}`, e, lecture);
+                                    }}
+                                    className="more-options-icon"
+                                  />
+                                </div>
+                              </li>
+                            ))}
+                          </div>
+                        )}
 
-                      {groupedLectures.yesterday.length > 0 && (
-                        <div className="date-group">
-                          <div className="date-header">어제</div>
-                          {groupedLectures.yesterday.map((lecture, index) => (
-                            <li
-                              key={lecture.id}
-                              className={`summary-list-item ${activeIndex === `yesterday-${index}` ? "active" : ""}`}
-                            >
-                              <div className="summary-item">
-                                <span
-                                  onClick={() => onSummaryClick(lecture, `yesterday-${index}`)}
-                                  className={activeIndex === `yesterday-${index}` ? "active" : ""}
-                                >
-                                  {lecture.title}
-                                </span>
-                                <HiOutlineDotsHorizontal
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMoreOptionsClick(`yesterday-${index}`, e, lecture);
-                                  }}
-                                  className="more-options-icon"
-                                />
-                              </div>
-                            </li>
-                          ))}
-                        </div>
-                      )}
+                        {groupedLectures.yesterday.length > 0 && (
+                          <div className="date-group">
+                            <div className="date-header">어제</div>
+                            {groupedLectures.yesterday.map((lecture, index) => (
+                              <li
+                                key={lecture.id}
+                                className={`summary-list-item ${activeIndex === `yesterday-${index}` ? "active" : ""}`}
+                              >
+                                <div className="summary-item">
+                                  <span
+                                    onClick={() => onSummaryClick(lecture, `yesterday-${index}`)}
+                                    className={activeIndex === `yesterday-${index}` ? "active" : ""}
+                                  >
+                                    {lecture.title}
+                                  </span>
+                                  <HiOutlineDotsHorizontal
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMoreOptionsClick(`yesterday-${index}`, e, lecture);
+                                    }}
+                                    className="more-options-icon"
+                                  />
+                                </div>
+                              </li>
+                            ))}
+                          </div>
+                        )}
 
-                      {groupedLectures.earlier.length > 0 && (
-                        <div className="date-group">
-                          <div className="date-header">이전</div>
-                          {groupedLectures.earlier.map((lecture, index) => (
-                            <li
-                              key={lecture.id}
-                              className={`summary-list-item ${activeIndex === `earlier-${index}` ? "active" : ""}`}
-                            >
-                              <div className="summary-item">
-                                <span
-                                  onClick={() => onSummaryClick(lecture, `earlier-${index}`)}
-                                  className={activeIndex === `earlier-${index}` ? "active" : ""}
-                                >
-                                  {lecture.title}
-                                </span>
-                                <HiOutlineDotsHorizontal
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMoreOptionsClick(`earlier-${index}`, e, lecture);
-                                  }}
-                                  className="more-options-icon"
-                                />
-                              </div>
-                            </li>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <li className="no-summaries">최근 강의가 없습니다</li>
-                  )}
-                </ul>
+                        {groupedLectures.earlier.length > 0 && (
+                          <div className="date-group">
+                            <div className="date-header">이전</div>
+                            {groupedLectures.earlier.map((lecture, index) => (
+                              <li
+                                key={lecture.id}
+                                className={`summary-list-item ${activeIndex === `earlier-${index}` ? "active" : ""}`}
+                              >
+                                <div className="summary-item">
+                                  <span
+                                    onClick={() => onSummaryClick(lecture, `earlier-${index}`)}
+                                    className={activeIndex === `earlier-${index}` ? "active" : ""}
+                                  >
+                                    {lecture.title}
+                                  </span>
+                                  <HiOutlineDotsHorizontal
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMoreOptionsClick(`earlier-${index}`, e, lecture);
+                                    }}
+                                    className="more-options-icon"
+                                  />
+                                </div>
+                              </li>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <li className="no-summaries">최근 강의가 없습니다</li>
+                    )}
+                  </ul>
+                </div>
               )}
 
               {/* <li>
