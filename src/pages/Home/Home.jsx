@@ -21,7 +21,7 @@ function Home({ setRecentSummaries, onLogout }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [remainingDays, setRemainingDays] = useState(5);
+  const [remainingDays, setRemainingDays] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,6 +88,18 @@ function Home({ setRecentSummaries, onLogout }) {
     }
   };
 
+  const handleSave = () => {
+    const days = remainingDays === "" ? "5" : remainingDays;
+    
+    console.log("강의 제목:", courseTitle);
+    console.log("강의 설명:", courseDescription);
+    console.log("시험까지 남은 기간:", days);
+  
+    // 저장 이후 모달 닫기
+    setShowCourseInput(false);
+  };
+  
+
   const showError = (msg) => {
     setErrorMessage(msg);
     setShowErrorModal(true);
@@ -153,18 +165,14 @@ function Home({ setRecentSummaries, onLogout }) {
         <div className="modal-overlay" onClick={() => setShowCourseInput(false)}>
           <div className="course-modal" onClick={e => e.stopPropagation()}>
             <button className="close-button" onClick={() => setShowCourseInput(false)}><IoClose /></button>
-            <p className="course-title">강의 제목과 설명을 입력하세요</p>
+            <p className="course-title">강의 제목과 설명, 기간을 설정하세요</p>
             <input className="course-title-input" type="text" value={courseTitle} onChange={e => setCourseTitle(e.target.value)} placeholder="강의 제목" />
             <textarea className="course-description-textarea" value={courseDescription} onChange={e => setCourseDescription(e.target.value)} placeholder="강의 설명 (선택사항)" />
             
             <div className="remaining-days-container">
-              <label htmlFor="remainingDays">시험까지 남은 기간</label>
-              <select 
-                id="remainingDays"
-                className="remaining-days-select"
-                value={remainingDays}
-                onChange={handleRemainingDaysChange}
-              >
+              {/* <label htmlFor="remainingDays">시험까지 남은 기간</label> */}
+              <select id="remainingDays" className="remaining-days-select" value={remainingDays} onChange={handleRemainingDaysChange}>
+                <option value="" disabled hidden>시험까지 남은 기간</option>
                 <option value="1">1일</option>
                 <option value="2">2일</option>
                 <option value="3">3일</option>
@@ -173,7 +181,7 @@ function Home({ setRecentSummaries, onLogout }) {
               </select>
             </div>
             
-            <button className="submit-button" onClick={() => setShowCourseInput(false)}>저장</button>
+            <button className="submit-button" onClick={handleSave}>저장</button>
           </div>
         </div>
       )}
