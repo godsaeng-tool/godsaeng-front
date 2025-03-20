@@ -660,7 +660,7 @@ const LectureDetailPage = () => {
               </Nav>
             </Card.Header>
             <Card.Body className="lecture-card-body">
-              <Tab.Content className="tab-content-fixed-height">
+              <Tab.Content>
                 <Tab.Pane eventKey="summary" active={activeTab === "summary"}>
                   <h4>강의 요약</h4>
                   <div className="lecture-tab-content summary-content">
