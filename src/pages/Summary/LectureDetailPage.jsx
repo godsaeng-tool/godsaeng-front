@@ -285,7 +285,7 @@ const LectureDetailPage = () => {
 
       <Row>
         <Col md={8}>
-          <Card className="mb-4">
+          <Card className="mb-4 lecture-card">
             <Card.Header>
               <Nav variant="tabs" defaultActiveKey="summary" onSelect={setActiveTab} className="custom-nav-tabs">
                 <Nav.Item><Nav.Link eventKey="summary">요약</Nav.Link></Nav.Item>
@@ -300,11 +300,29 @@ const LectureDetailPage = () => {
               </Nav>
             </Card.Header>
             <Card.Body className="lecture-card-body">
-              <Tab.Content>
+              <Tab.Content className="tab-content-fixed-height">
                 <Tab.Pane eventKey="summary" active={activeTab === "summary"}>
                   <h4>강의 요약</h4>
                   <div className="lecture-tab-content">
                     {lecture.summary || "요약 정보가 없습니다."}
+                  </div>
+                  <div className="download-btn-group mt-3">
+                    <Button
+                      className="txt-download-btn me-2"
+                      onClick={() =>
+                        handleDownload("summary", lecture.summary, "txt")
+                      }
+                    >
+                      요약 TXT 다운로드
+                    </Button>
+                    <Button
+                      className="pdf-download-btn"
+                      onClick={() =>
+                        handleDownload("summary", lecture.summary, "pdf")
+                      }
+                    >
+                      요약 PDF 다운로드
+                    </Button>
                   </div>
                 </Tab.Pane>
                 <Tab.Pane eventKey="transcript" active={activeTab === "transcript"}>
@@ -312,19 +330,91 @@ const LectureDetailPage = () => {
                   <div className="lecture-tab-content">
                     {lecture.transcript || "스크립트 정보가 없습니다."}
                   </div>
+                  <div className="download-btn-group mt-3">
+                    <Button
+                      className="txt-download-btn me-2"
+                      onClick={() =>
+                        handleDownload("transcript", lecture.transcript, "txt")
+                      }
+                    >
+                      스크립트 TXT 다운로드
+                    </Button>
+                    <Button
+                      className="pdf-download-btn"
+                      onClick={() =>
+                        handleDownload("transcript", lecture.transcript, "pdf")
+                      }
+                    >
+                      스크립트 PDF 다운로드
+                    </Button>
+                  </div>
                 </Tab.Pane>
                 <Tab.Pane eventKey="questions" active={activeTab === "questions"}>
                   <h4>예상 질문</h4>
                   <div className="lecture-tab-content">
                     {lecture.expectedQuestions || "예상 질문 정보가 없습니다."}
                   </div>
+                  <div className="download-btn-group mt-3">
+                    <Button
+                      className="txt-download-btn me-2"
+                      onClick={() =>
+                        handleDownload(
+                          "questions",
+                          lecture.expectedQuestions,
+                          "txt"
+                        )
+                      }
+                    >
+                      예상질문 TXT 다운로드
+                    </Button>
+                    <Button
+                      className="pdf-download-btn"
+                      onClick={() =>
+                        handleDownload(
+                          "questions",
+                          lecture.expectedQuestions,
+                          "pdf"
+                        )
+                      }
+                    >
+                      예상질문 PDF 다운로드
+                    </Button>
+                  </div>
                 </Tab.Pane>
                 <Tab.Pane eventKey="studyplan" active={activeTab === "studyplan"}>
                   <h4>학습 계획</h4>
                   {isGodMode ? (
-                    <div className="lecture-tab-content">
-                      {lecture.studyPlan || "학습 계획 정보가 없습니다."}
-                    </div>
+                    <>
+                      <div className="lecture-tab-content">
+                        {lecture.studyPlan || "학습 계획 정보가 없습니다."}
+                      </div>
+                      <div className="download-btn-group mt-3">
+                        <Button
+                          className="txt-download-btn me-2"
+                          onClick={() =>
+                            handleDownload(
+                              "studyplan",
+                              lecture.studyPlan,
+                              "txt"
+                            )
+                          }
+                        >
+                          학습계획 TXT 다운로드
+                        </Button>
+                        <Button
+                          className="pdf-download-btn"
+                          onClick={() =>
+                            handleDownload(
+                              "studyplan",
+                              lecture.studyPlan,
+                              "pdf"
+                            )
+                          }
+                        >
+                          학습계획 PDF 다운로드
+                        </Button>
+                      </div>
+                    </>
                   ) : (
                     <GodModePrompt />
                   )}
@@ -335,7 +425,14 @@ const LectureDetailPage = () => {
         </Col>
 
         <Col md={4}>
-          <ChatInterface lectureId={lectureId} />
+          <Card className="mb-4 chat-card">
+            <Card.Header className="chat-card-header">
+              <h5 className="mb-0">AI 학습 도우미</h5>
+            </Card.Header>
+            <Card.Body className="chat-card-body p-0">
+              <ChatInterface lectureId={lectureId} hideHeader={true} />
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 

@@ -116,3 +116,34 @@
 .user-dropdown .dropdown-divider {
   margin: 0.25rem 0;
 }
+
+/* 다운로드 버튼 스타일 */
+.download-btn-group {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.txt-download-btn {
+  background-color: #FFC330 !important;
+  border-color: #FFC330 !important;
+  color: #000 !important;
+}
+
+.txt-download-btn:hover {
+  background-color: #e6b82f !important;
+  border-color: #e6b82f !important;
+  color: #000 !important;
+}
+
+.pdf-download-btn {
+  background-color: #cb4c16 !important;
+  border-color: #cb4c16 !important;
+  color: #fff !important;
+}
+
+.pdf-download-btn:hover {
+  background-color: #b23f13 !important;
+  border-color: #b23f13 !important;
+  color: #fff !important;
+}
