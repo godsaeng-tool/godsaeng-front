@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { removeTokens, getToken } from "../utils/tokenUtils";
 import { getUserRecentLectures, updateLectureTitle, getLectures } from "../api/lectureApi";
 import { updateGodMode, getCurrentUser } from "../api/authApi";
@@ -127,6 +127,29 @@ export const AppStateProvider = ({ children }) => {
       setRecentSummaries([]);
     }
   };
+
+  // 세션 체크 함수 추가
+  const checkSession = useCallback(async () => {
+    const token = getToken();
+    if (!token) return;
+    
+    try {
+      // 사용자 정보 요청으로 토큰 유효성 확인
+      await getCurrentUser();
+    } catch (error) {
+      console.error("세션 체크 실패:", error);
+      // 에러 처리는 인터셉터에서 수행
+    }
+  }, []);
+
+  // 주기적으로 세션 체크 (선택적)
+  useEffect(() => {
+    if (isAuthenticated) {
+      // 15분마다 세션 체크
+      const sessionCheckInterval = setInterval(checkSession, 15 * 60 * 1000);
+      return () => clearInterval(sessionCheckInterval);
+    }
+  }, [isAuthenticated, checkSession]);
 
   // 로그아웃 함수 개선
   const handleLogout = () => {

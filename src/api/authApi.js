@@ -1,4 +1,8 @@
 import api from './index';
+import axios from 'axios';
+
+// API 기본 URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api';
 
 export const signup = async (userData) => {
   const response = await api.post('/users/signup', userData);
@@ -11,8 +15,16 @@ export const login = async (credentials) => {
 };
 
 export const refreshToken = async (refreshToken) => {
-  const response = await api.post('/users/refresh', { refreshToken });
-  return response.data;
+  // 직접 axios 사용 (api 인스턴스 사용 시 순환 참조 발생 가능)
+  try {
+    console.log('리프레시 토큰으로 새 액세스 토큰 요청 중...');
+    const response = await axios.post(`${API_BASE_URL}/users/refresh`, { refreshToken });
+    console.log('토큰 리프레시 응답:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('토큰 리프레시 API 호출 실패:', error);
+    throw error;
+  }
 };
 
 export const getCurrentUser = async () => {
