@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import jsPDF from "jspdf";
+import font from "./NotoSansKR-Regular-normal.js";
 import {
   Container, Row, Col, Card, Nav, Tab, Alert, Button, Spinner, Modal, Dropdown,
 } from "react-bootstrap";
@@ -50,6 +52,42 @@ const LectureDetailPage = () => {
     fetchLectureDetail();
   }, [fetchLectureDetail]);
 
+  const handleDownload = (type, content, format = "txt") => {
+    const fileNameMap = {
+      summary: "강의요약",
+      transcript: "전체스크립트",
+      questions: "예상질문",
+      studyplan: "학습계획",
+    };
+
+    const fileName = fileNameMap[type] || "lecture_content";
+
+    if (format === "txt") {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${fileName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    if (format === "pdf") {
+      const doc = new jsPDF();
+
+      doc.addFileToVFS("NotoSansKR-Regular-normal.ttf", font);
+      doc.addFont("NotoSansKR-Regular-normal.ttf", "NotoSansKR", "normal");
+      doc.setFont("NotoSansKR");
+      doc.setFontSize(12);
+
+      const lines = doc.splitTextToSize(content, 180);
+      doc.text(lines, 10, 10);
+      doc.save(`${fileName}.pdf`);
+    }
+  };
+
   useEffect(() => {
     let pollingInterval;
     if (isProcessing) {
@@ -99,7 +137,9 @@ const LectureDetailPage = () => {
 
   if (error)
     return (
-      <Container className={`center-container ${isSidebarCollapsed ? "collapsed" : ""}`}>
+      <Container
+        className={`center-container ${isSidebarCollapsed ? "collapsed" : ""}`}
+      >
         <Alert variant="danger">
           {error}
           <div className="mt-3">
@@ -111,50 +151,98 @@ const LectureDetailPage = () => {
       </Container>
     );
 
+  if (!lecture)
+    return (
+      <Container
+        className={`center-container ${isSidebarCollapsed ? "collapsed" : ""}`}
+      >
+        <Alert variant="warning">
+          강의를 찾을 수 없습니다.
+          <div className="mt-3">
+            <Button as={Link} to="/" variant="outline-primary">
+              홈으로 가기
+            </Button>
+          </div>
+        </Alert>
+      </Container>
+    );
+
   if (isProcessing)
     return (
-      <Container className={`center-container ${isSidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="text-center">
-          <Spinner animation="border" role="status" />
-          <h4 className="mt-3">강의 처리 중...</h4>
-          <p className="text-muted">
-            강의 내용을 분석하고 있습니다. 잠시만 기다려주세요.
+      <Container
+        className={`center-container ${isSidebarCollapsed ? "collapsed" : ""}`}
+      >
+        <div className="processing-container">
+          <Spinner
+            animation="border"
+            role="status"
+            variant="primary"
+            className="mb-3"
+          />
+          <h4>강의 처리 중...</h4>
+          <p className="mb-4">
+            강의 내용을 분석하고 AI 학습 자료를 생성하는 중입니다. 이 과정은 몇
+            분 정도 소요될 수 있습니다.
           </p>
-          <Button as={Link} to="/" variant="outline-primary" className="mt-3">
-            홈으로 가기
-          </Button>
+          <p>
+            <strong>강의 제목:</strong> {lecture.title}
+          </p>
+          {lecture.description && (
+            <p>
+              <strong>설명:</strong> {lecture.description}
+            </p>
+          )}
+          <div className="mt-4">
+            <Button
+              onClick={fetchLectureDetail}
+              className="custom-refresh-btn me-2"
+            >
+              새로고침
+            </Button>
+            <Button as={Link} to="/" variant="outline-secondary">
+              홈으로 가기
+            </Button>
+          </div>
         </div>
       </Container>
     );
 
-  // 유튜브 URL에서 임베드 URL 생성
-  let embedUrl = null;
-  if (lecture.youtubeUrl) {
-    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = lecture.youtubeUrl.match(youtubeRegex);
-    if (match && match[1]) {
-      embedUrl = `https://www.youtube.com/embed/${match[1]}`;
-    }
-  }
+  const getYoutubeEmbedUrl = (url) => {
+    if (!url) return null;
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11
+      ? `https://www.youtube.com/embed/${match[2]}`
+      : null;
+  };
+
+  const embedUrl =
+    lecture.sourceType === "YOUTUBE"
+      ? getYoutubeEmbedUrl(lecture.videoUrl)
+      : null;
 
   // 갓생모드 구독 안내 컴포넌트
   const GodModePrompt = () => (
     <div className="god-mode-prompt">
       <div className="text-center my-4 py-4">
-        <FaCrown className="crown-icon mb-3" style={{ fontSize: '3rem', color: '#FFC330' }} />
+        <FaCrown
+          className="crown-icon mb-3"
+          style={{ fontSize: "3rem", color: "#FFC330" }}
+        />
         <h4>갓생모드 전용 기능입니다</h4>
         <p className="mb-4">
-          학습 계획 기능은 갓생모드 구독자만 이용할 수 있습니다.
-          더 효율적인 학습을 위해 갓생모드를 구독해보세요!
+          학습 계획 기능은 갓생모드 구독자만 이용할 수 있습니다. 더 효율적인
+          학습을 위해 갓생모드를 구독해보세요!
         </p>
-        <Button 
-          variant="warning" 
+        <Button
+          variant="warning"
           className="god-mode-subscribe-btn"
           onClick={handleSubscribeGodMode}
           disabled={subscribing}
         >
-          <FaCrown className="me-2" /> 
-          {subscribing ? '구독 처리 중...' : '갓생모드 구독하기'}
+          <FaCrown className="me-2" />
+          {subscribing ? "구독 처리 중..." : "갓생모드 구독하기"}
         </Button>
       </div>
     </div>
