@@ -167,8 +167,8 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
         style={{
           flexGrow: 1,
           overflowY: "auto",
-          maxHeight: "444px",
-          minHeight: "444px",
+          maxHeight: "445px",
+          minHeight: "445px",
         }}
       >
         {initialLoading ? (
@@ -221,11 +221,17 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
 
           <div className="d-flex">
             <Form.Control
-              type="text"
+              as="textarea"
+              rows={1}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="질문을 입력하세요..."
               disabled={loading}
+              style={{
+                maxHeight: "160px",
+                overflowY: "auto",
+                resize: "none",
+              }}
             />
             <Button
               type="submit"
