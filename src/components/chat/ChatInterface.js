@@ -17,9 +17,9 @@ const ChatInterface = ({ lectureId, hideHeader = false }) => {
   const messages = messagesByLecture[lectureId] || [];
 
   const toneOptions = [
-    { value: "b", label: "츤데레" },
-    { value: "a", label: "플러팅" },
-    { value: "c", label: "신" },
+    { value: "b", label: "기본" },
+    { value: "a", label: "까칠한" },
+    { value: "c", label: "따뜻한" },
   ];
 
   const updateMessagesForLecture = (lectureId, updateFn) => {
