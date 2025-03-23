@@ -107,6 +107,7 @@ cd godsaeng-front
 2. **의존성 설치**
 ```bash
 npm install
+npm install react-markdown
 ```
 
 3. **개발 서버 실행**
