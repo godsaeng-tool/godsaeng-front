@@ -20,11 +20,14 @@ export const createYoutubeLecture = async (lectureData) => {
   return response.data;
 };
 
-export const uploadLecture = async (formData) => {
+export const uploadLecture = async (formData, config = {}) => {
+  const token = localStorage.getItem('authToken');
   const response = await api.post('/lectures/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${token}`, // 토큰을 헤더에 추가
     },
+    ...config
   });
   return response.data;
 };

@@ -34,8 +34,12 @@ function Home({ setRecentSummaries, onLogout }) {
     if (!isAuthenticatedContext) return showError("먼저 로그인을 해주세요.");
     const file = files[0];
     if (!file) return;
-    const allowedTypes = ["video/mp4", "video/avi", "video/mov", "video/wmv"];
-    if (!allowedTypes.includes(file.type)) return showError("지원되지 않는 파일 형식입니다. MP4, AVI, MOV, WMV만 업로드 가능합니다.");
+    const allowedTypes = [
+      "video/mp4", "video/avi", "video/mov", "video/wmv", 
+      "application/pdf", 
+      "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    ];
+    if (!allowedTypes.includes(file.type)) return showError("지원되지 않는 파일 형식입니다. 비디오(MP4, AVI, MOV, WMV), PDF, PPT 파일만 업로드 가능합니다.");
     setSelectedFile(file);
     setUploadProgress(0);
   };
@@ -142,7 +146,14 @@ function Home({ setRecentSummaries, onLogout }) {
         <button onClick={() => isAuthenticatedContext ? document.getElementById('fileInput').click() : showError("먼저 로그인을 해주세요.")} disabled={loading}>
           <HiOutlineUpload /> 업로드
         </button>
-        <input id="fileInput" type="file" accept="video/mp4,video/avi,video/mov,video/wmv" style={{ display: "none" }} onChange={handleFileChange} disabled={loading} />
+        <input 
+          id="fileInput" 
+          type="file" 
+          accept="video/mp4,video/avi,video/mov,video/wmv,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" 
+          style={{ display: "none" }} 
+          onChange={handleFileChange} 
+          disabled={loading} 
+        />
         <button onClick={() => isAuthenticatedContext ? setShowCourseInput(true) : showError("먼저 로그인을 해주세요.")} disabled={loading}>
           <FaPen /> 강의 정보 입력
         </button>
